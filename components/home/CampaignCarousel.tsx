@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 
 const SCROLL_SPEED = 0.6; // px/khung hình (~36px/s ở 60fps) — chạy liên tục kiểu marquee
-const DRAG_CLICK_THRESHOLD = 6; // px — di chuyển ít hơn mức này khi thả chuột thì tính là bấm, không phải kéo
-const DIRECTION_LOCK_DISTANCE = 4; // px — cần di chuyển ít nhất mức này mới đủ để đoán hướng ngang/dọc
+const DRAG_CLICK_THRESHOLD = 6; // px — di chuyển ít hơn mức này khi thả thì tính là bấm, không phải kéo
 
 export function CampaignCarousel({ images, basePath = "/campaign" }: { images: string[]; basePath?: string }) {
   const router = useRouter();
@@ -18,12 +17,7 @@ export function CampaignCarousel({ images, basePath = "/campaign" }: { images: s
   const dragStartScroll = useRef(0);
   const movedDistance = useRef(0);
   const pressedIndex = useRef<number | null>(null);
-  // null = chưa đủ di chuyển để biết hướng, true = đã xác định là kéo NGANG (tự
-  // xử lý), false = đã xác định là cuộn DỌC (buông luôn, để trình duyệt lo).
-  // Quyết định 1 lần duy nhất mỗi cử chỉ — không hỏi lại hasPointerCapture() vì
-  // API đó phản hồi không đáng tin cậy trên 1 số trình duyệt di động, gây ra
-  // hiện tượng kéo bị khựng/chỉ dịch được 1 chút mỗi lần.
-  const lockedHorizontal = useRef<boolean | null>(null);
+  const isMouseDrag = useRef(false);
 
   // Nhân đôi danh sách ảnh để cuộn liên tục không bị "giật" khi lặp lại.
   const loop = images.length > 1 ? [...images, ...images] : images;
@@ -54,19 +48,24 @@ export function CampaignCarousel({ images, basePath = "/campaign" }: { images: s
   // gốc của trình duyệt, tranh chấp với code kéo tự viết dưới đây (gây ra cả lỗi
   // "kéo không được" lẫn "bấm không vào trang"). Thay vào đó tự điều hướng bằng
   // router.push() sau khi xác định chắc chắn đây là 1 cú bấm, không phải kéo.
+  //
+  // Trên CHUỘT: container không tự "kéo để cuộn" được (đó là hành vi chỉ có
+  // sẵn cho cảm ứng), nên tự viết pointer-drag bằng tay cho chuột.
+  // Trên CẢM ỨNG: overflow-x-auto đã tự kéo-cuộn ngang mượt sẵn, và trình
+  // duyệt đã tự phân biệt đúng "vuốt ngang" (cuộn dải ảnh) với "vuốt dọc"
+  // (cuộn trang) — không đụng vào scrollLeft/pointer capture ở đây, để tránh
+  // tranh chấp với engine cuộn gốc (nguyên nhân gây khựng/giật trước đây).
   function onPointerDown(e: React.PointerEvent, index: number) {
     const el = trackRef.current;
     if (!el) return;
     interacting.current = true;
     movedDistance.current = 0;
-    lockedHorizontal.current = null;
     pressedIndex.current = index;
     dragStartX.current = e.clientX;
     dragStartY.current = e.clientY;
     dragStartScroll.current = el.scrollLeft;
-    // Không setPointerCapture ở đây nữa — chờ tới khi xác định chắc chắn đây là
-    // kéo NGANG (xem onPointerMove) mới bắt, để cuộn DỌC trang chạm đúng lên dải
-    // ảnh này vẫn được trình duyệt xử lý cuộn bình thường (touchAction: pan-y).
+    isMouseDrag.current = e.pointerType === "mouse";
+    if (isMouseDrag.current) el.setPointerCapture(e.pointerId);
   }
   function onPointerMove(e: React.PointerEvent) {
     if (!interacting.current) return;
@@ -75,22 +74,8 @@ export function CampaignCarousel({ images, basePath = "/campaign" }: { images: s
     const dx = e.clientX - dragStartX.current;
     const dy = e.clientY - dragStartY.current;
     movedDistance.current = Math.hypot(dx, dy);
-
-    if (lockedHorizontal.current === null) {
-      if (movedDistance.current < DIRECTION_LOCK_DISTANCE) return; // chưa đủ để đoán hướng
-      lockedHorizontal.current = Math.abs(dx) > Math.abs(dy);
-      if (lockedHorizontal.current) {
-        el.setPointerCapture(e.pointerId);
-      } else {
-        // Xác định là cuộn dọc trang — buông hẳn ngay, không giữ lại gì nữa.
-        interacting.current = false;
-        pressedIndex.current = null;
-        return;
-      }
-    }
-    if (!lockedHorizontal.current) return;
-    e.preventDefault();
-    el.scrollLeft = dragStartScroll.current - dx;
+    // Chỉ chuột mới tự kéo-cuộn bằng tay; cảm ứng để trình duyệt tự lo hoàn toàn.
+    if (isMouseDrag.current) el.scrollLeft = dragStartScroll.current - dx;
   }
   function onPointerUp() {
     interacting.current = false;
@@ -102,8 +87,6 @@ export function CampaignCarousel({ images, basePath = "/campaign" }: { images: s
     }
   }
   function onPointerCancel() {
-    // Trình duyệt tự huỷ pointer khi nhận ra đây là cử chỉ cuộn dọc trang (nhờ
-    // touchAction: pan-y) — chỉ reset trạng thái, KHÔNG điều hướng.
     interacting.current = false;
     pressedIndex.current = null;
   }
@@ -114,7 +97,6 @@ export function CampaignCarousel({ images, basePath = "/campaign" }: { images: s
     <div
       ref={trackRef}
       className="no-scrollbar flex cursor-grab gap-2 overflow-x-auto select-none active:cursor-grabbing"
-      style={{ touchAction: "pan-y" }}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerLeave={onPointerUp}
