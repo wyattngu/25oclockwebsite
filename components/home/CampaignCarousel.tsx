@@ -13,6 +13,7 @@ export function CampaignCarousel({ images, basePath = "/campaign" }: { images: s
   const rafRef = useRef<number | null>(null);
   const interacting = useRef(false); // true trong lúc đang thực sự bấm/kéo — tick() sẽ bỏ qua bước tự chạy
   const dragStartX = useRef(0);
+  const dragStartY = useRef(0);
   const dragStartScroll = useRef(0);
   const movedDistance = useRef(0);
   const pressedIndex = useRef<number | null>(null);
@@ -53,16 +54,29 @@ export function CampaignCarousel({ images, basePath = "/campaign" }: { images: s
     movedDistance.current = 0;
     pressedIndex.current = index;
     dragStartX.current = e.clientX;
+    dragStartY.current = e.clientY;
     dragStartScroll.current = el.scrollLeft;
-    el.setPointerCapture(e.pointerId);
+    // Không setPointerCapture ở đây nữa — chờ tới khi xác định chắc chắn đây là
+    // kéo NGANG (xem onPointerMove) mới bắt, để cuộn DỌC trang chạm đúng lên dải
+    // ảnh này vẫn được trình duyệt xử lý cuộn bình thường (touchAction: pan-y).
   }
   function onPointerMove(e: React.PointerEvent) {
     if (!interacting.current) return;
     const el = trackRef.current;
     if (!el) return;
-    const delta = e.clientX - dragStartX.current;
-    movedDistance.current = Math.abs(delta);
-    el.scrollLeft = dragStartScroll.current - delta;
+    const dx = e.clientX - dragStartX.current;
+    const dy = e.clientY - dragStartY.current;
+    movedDistance.current = Math.hypot(dx, dy);
+    // Chỉ bắt đầu tự kéo ngang khi rõ ràng người dùng đang di chuyển ngang nhiều
+    // hơn dọc — tránh cướp cử chỉ cuộn dọc trang của trình duyệt trên mobile.
+    if (!el.hasPointerCapture(e.pointerId)) {
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > DRAG_CLICK_THRESHOLD) {
+        el.setPointerCapture(e.pointerId);
+      } else {
+        return;
+      }
+    }
+    el.scrollLeft = dragStartScroll.current - dx;
   }
   function onPointerUp() {
     interacting.current = false;
@@ -73,6 +87,12 @@ export function CampaignCarousel({ images, basePath = "/campaign" }: { images: s
       router.push(`${basePath}?start=${index % images.length}`);
     }
   }
+  function onPointerCancel() {
+    // Trình duyệt tự huỷ pointer khi nhận ra đây là cử chỉ cuộn dọc trang (nhờ
+    // touchAction: pan-y) — chỉ reset trạng thái, KHÔNG điều hướng.
+    interacting.current = false;
+    pressedIndex.current = null;
+  }
 
   if (images.length === 0) return null;
 
@@ -80,9 +100,11 @@ export function CampaignCarousel({ images, basePath = "/campaign" }: { images: s
     <div
       ref={trackRef}
       className="no-scrollbar flex cursor-grab gap-2 overflow-x-auto select-none active:cursor-grabbing"
+      style={{ touchAction: "pan-y" }}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerLeave={onPointerUp}
+      onPointerCancel={onPointerCancel}
       onDragStart={(e) => e.preventDefault()}
     >
       {loop.map((src, i) => (
