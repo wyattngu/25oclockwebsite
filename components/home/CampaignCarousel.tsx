@@ -6,6 +6,7 @@ import { useEffect, useRef } from "react";
 
 const SCROLL_SPEED = 0.6; // px/khung hình (~36px/s ở 60fps) — chạy liên tục kiểu marquee
 const DRAG_CLICK_THRESHOLD = 6; // px — di chuyển ít hơn mức này khi thả chuột thì tính là bấm, không phải kéo
+const DIRECTION_LOCK_DISTANCE = 4; // px — cần di chuyển ít nhất mức này mới đủ để đoán hướng ngang/dọc
 
 export function CampaignCarousel({ images, basePath = "/campaign" }: { images: string[]; basePath?: string }) {
   const router = useRouter();
@@ -17,6 +18,12 @@ export function CampaignCarousel({ images, basePath = "/campaign" }: { images: s
   const dragStartScroll = useRef(0);
   const movedDistance = useRef(0);
   const pressedIndex = useRef<number | null>(null);
+  // null = chưa đủ di chuyển để biết hướng, true = đã xác định là kéo NGANG (tự
+  // xử lý), false = đã xác định là cuộn DỌC (buông luôn, để trình duyệt lo).
+  // Quyết định 1 lần duy nhất mỗi cử chỉ — không hỏi lại hasPointerCapture() vì
+  // API đó phản hồi không đáng tin cậy trên 1 số trình duyệt di động, gây ra
+  // hiện tượng kéo bị khựng/chỉ dịch được 1 chút mỗi lần.
+  const lockedHorizontal = useRef<boolean | null>(null);
 
   // Nhân đôi danh sách ảnh để cuộn liên tục không bị "giật" khi lặp lại.
   const loop = images.length > 1 ? [...images, ...images] : images;
@@ -52,6 +59,7 @@ export function CampaignCarousel({ images, basePath = "/campaign" }: { images: s
     if (!el) return;
     interacting.current = true;
     movedDistance.current = 0;
+    lockedHorizontal.current = null;
     pressedIndex.current = index;
     dragStartX.current = e.clientX;
     dragStartY.current = e.clientY;
@@ -67,15 +75,21 @@ export function CampaignCarousel({ images, basePath = "/campaign" }: { images: s
     const dx = e.clientX - dragStartX.current;
     const dy = e.clientY - dragStartY.current;
     movedDistance.current = Math.hypot(dx, dy);
-    // Chỉ bắt đầu tự kéo ngang khi rõ ràng người dùng đang di chuyển ngang nhiều
-    // hơn dọc — tránh cướp cử chỉ cuộn dọc trang của trình duyệt trên mobile.
-    if (!el.hasPointerCapture(e.pointerId)) {
-      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > DRAG_CLICK_THRESHOLD) {
+
+    if (lockedHorizontal.current === null) {
+      if (movedDistance.current < DIRECTION_LOCK_DISTANCE) return; // chưa đủ để đoán hướng
+      lockedHorizontal.current = Math.abs(dx) > Math.abs(dy);
+      if (lockedHorizontal.current) {
         el.setPointerCapture(e.pointerId);
       } else {
+        // Xác định là cuộn dọc trang — buông hẳn ngay, không giữ lại gì nữa.
+        interacting.current = false;
+        pressedIndex.current = null;
         return;
       }
     }
+    if (!lockedHorizontal.current) return;
+    e.preventDefault();
     el.scrollLeft = dragStartScroll.current - dx;
   }
   function onPointerUp() {
