@@ -9,3 +9,6 @@ build
 Thumbs.db
 next-env.d.ts
 .tmp-*
+
+.vercel
+.env*
