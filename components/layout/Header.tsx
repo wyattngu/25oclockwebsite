@@ -94,7 +94,7 @@ export function Header({
             )}
           </div>
 
-          <div className="flex items-center justify-self-end gap-4">
+          <div className="flex items-center justify-self-end gap-5 md:gap-4">
             <button aria-label="Tìm kiếm" onClick={() => setSearchOpen(true)} className="p-1.5">
               <IconSearch className="h-5 w-5" />
             </button>

@@ -8,7 +8,7 @@ export function AddedToast() {
   const { toast, dismissToast, openCart } = useCart();
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-5 z-[60] flex justify-center px-4 md:justify-end md:pr-8">
+    <div className="pointer-events-none fixed inset-x-0 bottom-5 z-[60] flex justify-end px-4 md:pr-8">
       <AnimatePresence>
         {toast ? (
           <motion.div

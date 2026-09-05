@@ -110,7 +110,7 @@ export function ProductBuyBox({ product, initialVariantId }: { product: Product;
       </div>
 
       {/* Số lượng + thêm vào giỏ */}
-      <div ref={addToCartRowRef} className="mt-6 flex items-stretch gap-3">
+      <div ref={addToCartRowRef} className="mt-6 flex items-stretch gap-4 md:gap-3">
         <div className="flex items-center border border-line">
           <button
             type="button"
@@ -146,7 +146,7 @@ export function ProductBuyBox({ product, initialVariantId }: { product: Product;
         fullWidth
         onClick={handleBuyNow}
         disabled={!selectedVariant.available}
-        className="mt-3"
+        className="mt-4 md:mt-3"
       >
         Mua ngay
       </Button>
