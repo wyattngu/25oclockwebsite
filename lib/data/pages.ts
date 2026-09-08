@@ -1,9 +1,17 @@
+import { company } from "@/lib/data/company";
+import { formatPrice } from "@/lib/utils/formatPrice";
+
 export type StaticPage = {
   slug: string;
   title: string;
   intro?: string;
   sections: { heading: string; paragraphs: string[]; list?: string[] }[];
 };
+
+// Dùng chung đúng 1 nguồn (company.freeShippingThreshold) cho mọi chỗ nhắc tới
+// mốc miễn phí ship — đổi ở lib/data/company.ts là tự cập nhật khắp nơi, không
+// còn cảnh sửa 1 chỗ mà chỗ khác vẫn ghi số cũ.
+const freeShippingLine = `Miễn phí vận chuyển cho đơn hàng từ ${formatPrice({ amount: company.freeShippingThreshold, currencyCode: "VND" })}.`;
 
 export const staticPages: StaticPage[] = [
   {
@@ -62,7 +70,7 @@ export const staticPages: StaticPage[] = [
         list: [
           "Nội thành Hà Nội: 1–2 ngày làm việc.",
           "Các tỉnh thành khác: 2–4 ngày làm việc.",
-          "Miễn phí vận chuyển cho đơn hàng từ 1.000.000₫.",
+          freeShippingLine,
         ],
       },
       {
@@ -73,7 +81,7 @@ export const staticPages: StaticPage[] = [
       },
       {
         heading: "Đổi trả",
-        paragraphs: ["Chấp nhận đổi size hoặc trả hàng trong vòng 3 ngày kể từ khi nhận hàng."],
+        paragraphs: [`Chấp nhận đổi size hoặc trả hàng trong vòng ${company.returnWindowDays} ngày kể từ khi nhận hàng.`],
         list: [
           "Sản phẩm còn nguyên tem, chưa qua sử dụng hoặc giặt.",
           "Chi phí vận chuyển đổi trả do khách hàng chi trả, trừ trường hợp lỗi từ nhà sản xuất.",

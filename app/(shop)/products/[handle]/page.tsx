@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAllProducts, getProductByHandle, getRelatedProducts } from "@/lib/data/products";
 import { getProductPhotos, withPhotosList } from "@/lib/utils/productImages";
+import { company } from "@/lib/data/company";
+import { formatPrice } from "@/lib/utils/formatPrice";
 import { Gallery } from "@/components/product/Gallery";
 import { ProductBuyBox } from "@/components/product/ProductBuyBox";
 import { Accordion } from "@/components/ui/Accordion";
@@ -81,7 +83,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
       <div className="grid grid-cols-1 gap-8 md:grid-cols-[60%_40%] md:gap-12">
         <Gallery photos={photos} images={product.images} code={product.code} alt={product.title} />
 
-        <div className="md:sticky md:top-[calc(var(--chrome-h,96px)+24px)] md:self-start">
+        <div className="md:sticky md:top-[calc(var(--chrome-h,96px)+24px)] md:max-h-[calc(100svh-var(--chrome-h,96px)-48px)] md:self-start md:overflow-y-auto">
           <h1 className="text-[20px] font-medium uppercase leading-snug tracking-[0.03em] md:text-[24px]">
             {product.title}
           </h1>
@@ -121,8 +123,11 @@ export default async function ProductPage({ params, searchParams }: Props) {
                   heading: "Vận chuyển & đổi trả",
                   content: (
                     <div className="space-y-2">
-                      <p>Giao nội thành 1–2 ngày, tỉnh thành khác 2–4 ngày. Miễn phí ship cho đơn từ 800.000₫.</p>
-                      <p>Đổi trả trong 7 ngày nếu còn nguyên tem, chưa qua sử dụng.</p>
+                      <p>
+                        Giao nội thành 1–2 ngày, tỉnh thành khác 2–4 ngày. Miễn phí ship cho đơn từ{" "}
+                        {formatPrice({ amount: company.freeShippingThreshold, currencyCode: "VND" })}.
+                      </p>
+                      <p>Đổi trả trong {company.returnWindowDays} ngày nếu còn nguyên tem, chưa qua sử dụng.</p>
                       <Link href="/pages/shipping-returns" className="inline-block underline underline-offset-2">
                         Xem chính sách đầy đủ
                       </Link>

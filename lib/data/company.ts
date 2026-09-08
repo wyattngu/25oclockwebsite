@@ -2,6 +2,8 @@ export const company = {
   email: "25oclockhome@gmail.com",
   instagram: { label: "@25oclock.home", url: "https://instagram.com/25oclock.home" },
   freeShippingThreshold: 1000000,
+  /** Số ngày được đổi/trả hàng kể từ khi nhận — dùng chung ở trang sản phẩm và trang chính sách, sửa 1 chỗ này là đủ. */
+  returnWindowDays: 3,
   /**
    * Tài khoản ngân hàng nhận chuyển khoản — dùng để tạo mã VietQR ở trang /checkout.
    * Sửa 3 dòng dưới đây thành thông tin thật của bạn rồi lưu lại, web sẽ tự cập nhật QR.
