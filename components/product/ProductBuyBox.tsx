@@ -90,18 +90,28 @@ export function ProductBuyBox({ product, initialVariantId }: { product: Product;
               <button
                 key={v.id}
                 type="button"
-                disabled={!v.available}
-                onClick={() => selectVariant(v.id)}
+                aria-disabled={!v.available}
+                onClick={() => {
+                  if (v.available) selectVariant(v.id);
+                }}
                 aria-pressed={isSelected}
-                className={`relative h-11 min-w-11 border px-3 text-[13px] transition-colors ${
+                className={`group relative h-11 min-w-11 border px-3 text-[13px] transition-colors ${
                   isSelected ? "border-ink bg-ink text-white" : "border-line text-ink hover:border-ink"
-                } ${!v.available ? "pointer-events-none overflow-hidden text-ink-60/60" : ""}`}
+                } ${!v.available ? "cursor-not-allowed text-ink-60/60" : ""}`}
               >
                 {v.size}
                 {!v.available ? (
-                  <span className="absolute inset-0 flex items-center justify-center">
-                    <span className="h-[1.5px] w-[140%] rotate-[-20deg] bg-sale" />
-                  </span>
+                  <>
+                    {/* Dấu X cân đối, 2 nét chéo cùng độ dài bắt chéo giữa nút — không lệch tâm như 1 gạch chéo đơn. */}
+                    <span className="pointer-events-none absolute inset-0 overflow-hidden">
+                      <span className="absolute left-1/2 top-1/2 h-[1.5px] w-[150%] -translate-x-1/2 -translate-y-1/2 rotate-45 bg-sale" />
+                      <span className="absolute left-1/2 top-1/2 h-[1.5px] w-[150%] -translate-x-1/2 -translate-y-1/2 -rotate-45 bg-sale" />
+                    </span>
+                    {/* Chú thích hiện khi rê chuột / chạm vào — báo rõ vì sao size này không bấm được. */}
+                    <span className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap bg-ink px-2 py-1 text-[11px] normal-case tracking-normal text-white opacity-0 transition-opacity duration-150 group-hover:opacity-100">
+                      Hết size {v.size}
+                    </span>
+                  </>
                 ) : null}
               </button>
             );
