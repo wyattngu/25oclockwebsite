@@ -103,6 +103,13 @@ export default async function ProductPage({ params, searchParams }: Props) {
                         <li>Form dáng: {product.fit}</li>
                         <li>Sản xuất tại: {product.madeIn}</li>
                       </ul>
+                      {product.details?.length ? (
+                        <ul className="mt-3 list-disc space-y-1 pl-4 text-ink-60">
+                          {product.details.map((line) => (
+                            <li key={line}>{line}</li>
+                          ))}
+                        </ul>
+                      ) : null}
                     </div>
                   ),
                 },

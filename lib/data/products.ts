@@ -70,6 +70,8 @@ type RawProduct = {
   createdAt: string;
   descriptionVi: string;
   descriptionEn: string;
+  /** Gạch đầu dòng đặc điểm nổi bật, hiện trong mục "Chi tiết" ở trang sản phẩm — không bắt buộc, để trống nếu chưa có thông tin. */
+  details?: string[];
   /** Danh sách size hết hàng của riêng sản phẩm này — hiện gạch đỏ, không bấm chọn được. Xem hướng dẫn ngay phía trên mảng RAW bên dưới. */
   unavailableSizes?: string[];
   soldOut?: boolean;
@@ -98,7 +100,7 @@ const RAW: RawProduct[] = [
     tones: ["charcoal", "ink", "charcoal", "stone"],
     labels: ["FRONT", "ON MODEL", "BACK", "DETAIL"],
     sizes: ["0", "1", "2"],
-    unavailableSizes: [], // ví dụ: ["1"] nếu hết size 1
+    unavailableSizes: ["0", "1"], // ví dụ: ["1"] nếu hết size 1
     sizeChart: MIDNIGHT_SIZE_CHART,
     material: "Raw denim 14oz, 100% cotton",
     care: "Hạn chế giặt trong 3–6 tháng đầu để lên form và bạc màu tự nhiên — Không giặt máy, không dùng chất tẩy mạnh / Avoid washing for the first 3–6 months to let the denim break in — avoid machine washing and harsh detergents",
@@ -121,18 +123,30 @@ const RAW: RawProduct[] = [
     tones: ["ink", "charcoal", "ink", "stone"],
     labels: ["FRONT", "ON MODEL", "BACK", "DETAIL"],
     sizes: ["1", "2", "3"],
-    unavailableSizes: [], // ví dụ: ["1"] nếu hết size 1
+    unavailableSizes: ["2"], // ví dụ: ["1"] nếu hết size 1
     sizeChart: ECLIPSE_SIZE_CHART,
-    material: "Raw denim 13oz, 100% cotton",
+    material: "Vải raw denim đen, bề mặt mộc, đứng form",
     care: "Hạn chế giặt trong 3–6 tháng đầu để lên form và bạc màu tự nhiên — Không giặt máy, không dùng chất tẩy mạnh / Avoid washing for the first 3–6 months to let the denim break in — avoid machine washing and harsh detergents",
-    fit: "Regular",
+    fit: "Regular", // form ống đứng/straight fit — xem chi tiết trong "details" bên dưới, trường này chỉ nhận Slim/Regular/Oversized
     modelInfo: "Model cao 1m80, nặng 68kg, mặc size 2",
     collections: ["all", "bottoms", "new"],
     createdAt: "2026-08-30",
     descriptionVi:
-      "Quần jean raw denim dáng straight ống đứng, màu xanh đen ánh tối (eclipse), vải denim nguyên bản chưa qua xử lý giúp lên màu và nếp gấp tự nhiên theo thời gian sử dụng.",
+      "Quần jean raw denim dáng straight ống đứng, màu đen, vải denim nguyên bản chưa qua xử lý giúp lên màu và nếp gấp tự nhiên theo thời gian sử dụng.",
     descriptionEn:
-      "Straight-leg raw denim jeans in a dark eclipse indigo wash. Unprocessed denim that develops natural fades and creases with wear.",
+      "Straight-leg raw denim jeans in black. Unprocessed denim that develops natural fades and creases with wear.",
+    details: [
+      "Màu: Black",
+      "Form: Straight fit",
+      "YKK zipper",
+      "Zipper tape được xử lý bọc viền tỉ mỉ",
+      "Cúc kim loại donut 25 O'CLOCK",
+      "Signature baby blue tab",
+      "Signature strap phía trước",
+      "Stainless steel lighter clip ở túi sau",
+      "Distressed tự nhiên ở viền túi",
+      "Lót túi được làm toàn bộ bằng crinkle nylon",
+    ],
   },
   {
     code: "S02",
@@ -199,6 +213,7 @@ export const products: Product[] = RAW.map((r) => {
     compareAtPrice,
     descriptionVi: r.descriptionVi,
     descriptionEn: r.descriptionEn,
+    details: r.details,
     material: r.material,
     care: r.care,
     madeIn: "Việt Nam",
