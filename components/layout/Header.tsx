@@ -14,9 +14,11 @@ import { SearchOverlay } from "@/components/layout/SearchOverlay";
 export function Header({
   isLoggedIn = false,
   collectionCovers = {},
+  productPhotos = {},
 }: {
   isLoggedIn?: boolean;
   collectionCovers?: Record<string, string | null>;
+  productPhotos?: Record<string, string[]>;
 }) {
   const pathname = usePathname();
   const isHome = pathname === "/";
@@ -117,7 +119,7 @@ export function Header({
         isLoggedIn={isLoggedIn}
         collectionCovers={collectionCovers}
       />
-      <SearchOverlay isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+      <SearchOverlay isOpen={searchOpen} onClose={() => setSearchOpen(false)} productPhotos={productPhotos} />
     </>
   );
 }

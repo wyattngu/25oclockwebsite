@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -10,7 +11,16 @@ import { normalize, searchProducts } from "@/lib/data/products";
 import { navCollections } from "@/lib/data/collections";
 import { formatPrice } from "@/lib/utils/formatPrice";
 
-export function SearchOverlay({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+export function SearchOverlay({
+  isOpen,
+  onClose,
+  productPhotos = {},
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  /** handle -> danh sách ảnh thật, đọc sẵn ở server và truyền xuống (xem app/(shop)/layout.tsx) — ô này chạy ở client nên không tự đọc file ảnh được. */
+  productPhotos?: Record<string, string[]>;
+}) {
   const router = useRouter();
   const [query, setQuery] = useState("");
 
@@ -80,15 +90,28 @@ export function SearchOverlay({ isOpen, onClose }: { isOpen: boolean; onClose: (
                   <div>
                     <p className="nav-link mb-4 text-ink-60">Sản phẩm</p>
                     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                      {productMatches.map((p) => (
-                        <Link key={p.id} href={`/products/${p.handle}`} onClick={onClose} className="group">
-                          <div className="aspect-[3/4] w-full overflow-hidden bg-bg-alt">
-                            <Placeholder tone={p.images[0].tone} title={p.code} fill />
-                          </div>
-                          <p className="mt-2 truncate text-[12px] uppercase tracking-wide">{p.title}</p>
-                          <p className="text-[12px] text-ink-60">{formatPrice(p.price)}</p>
-                        </Link>
-                      ))}
+                      {productMatches.map((p) => {
+                        const photo = productPhotos[p.handle]?.[0];
+                        return (
+                          <Link key={p.id} href={`/products/${p.handle}`} onClick={onClose} className="group">
+                            <div className="relative aspect-[3/4] w-full overflow-hidden bg-bg-alt">
+                              {photo ? (
+                                <Image
+                                  src={photo}
+                                  alt={p.title}
+                                  fill
+                                  sizes="(max-width: 639px) 50vw, 33vw"
+                                  className="object-cover"
+                                />
+                              ) : (
+                                <Placeholder tone={p.images[0].tone} title={p.code} fill />
+                              )}
+                            </div>
+                            <p className="mt-2 truncate text-[12px] uppercase tracking-wide">{p.title}</p>
+                            <p className="text-[12px] text-ink-60">{formatPrice(p.price)}</p>
+                          </Link>
+                        );
+                      })}
                     </div>
                   </div>
                 ) : null}

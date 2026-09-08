@@ -38,3 +38,13 @@ export function withPhotos(product: Product): Product {
 export function withPhotosList(products: Product[]): Product[] {
   return products.map(withPhotos);
 }
+
+/**
+ * Map handle -> danh sách ảnh thật, dùng cho những nơi hiển thị sản phẩm mà
+ * KHÔNG chạy trong Server Component nên không tự gọi getProductPhotos() được
+ * (ví dụ ô tìm kiếm SearchOverlay — chạy phía client) — phải đọc sẵn ở server
+ * (layout.tsx) rồi truyền xuống qua props.
+ */
+export function getProductPhotosMap(handles: string[]): Record<string, string[]> {
+  return Object.fromEntries(handles.map((h) => [h, getProductPhotos(h)]));
+}
