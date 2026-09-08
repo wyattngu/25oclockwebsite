@@ -11,16 +11,16 @@ const SORT_OPTIONS = [
   { value: "bestseller", label: "Bán chạy" },
 ];
 
-const SIZE_OPTIONS = ["S", "M", "L", "XL"];
-
 type Props = {
   resultCount: number;
   sort: string;
   sizes: string[];
   inStock: boolean;
+  /** Size thật sự có trong collection này (đã sắp) — xem lib/data/products.ts getAvailableSizes(). */
+  availableSizes: string[];
 };
 
-export function CollectionToolbar({ resultCount, sort, sizes, inStock }: Props) {
+export function CollectionToolbar({ resultCount, sort, sizes, inStock, availableSizes }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const [filterOpen, setFilterOpen] = useState(false);
@@ -97,23 +97,25 @@ export function CollectionToolbar({ resultCount, sort, sizes, inStock }: Props) 
 
       <Drawer isOpen={filterOpen} onClose={() => setFilterOpen(false)} side="bottom" title="Bộ lọc">
         <div className="space-y-6 p-5">
-          <div>
-            <h3 className="nav-link mb-3">Size</h3>
-            <div className="flex flex-wrap gap-2">
-              {SIZE_OPTIONS.map((size) => (
-                <button
-                  key={size}
-                  type="button"
-                  onClick={() => toggleDraftSize(size)}
-                  className={`h-10 min-w-10 border px-3 text-[13px] transition-colors ${
-                    draftSizes.includes(size) ? "border-ink bg-ink text-white" : "border-line text-ink"
-                  }`}
-                >
-                  {size}
-                </button>
-              ))}
+          {availableSizes.length > 0 ? (
+            <div>
+              <h3 className="nav-link mb-3">Size</h3>
+              <div className="flex flex-wrap gap-2">
+                {availableSizes.map((size) => (
+                  <button
+                    key={size}
+                    type="button"
+                    onClick={() => toggleDraftSize(size)}
+                    className={`h-10 min-w-10 border px-3 text-[13px] transition-colors ${
+                      draftSizes.includes(size) ? "border-ink bg-ink text-white" : "border-line text-ink"
+                    }`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          ) : null}
           <label className="flex items-center gap-2 text-[14px]">
             <input
               type="checkbox"

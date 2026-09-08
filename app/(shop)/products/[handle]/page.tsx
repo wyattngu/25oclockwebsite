@@ -98,8 +98,6 @@ export default async function ProductPage({ params, searchParams }: Props) {
                   heading: "Chi tiết",
                   content: (
                     <div className="space-y-3">
-                      <p>{product.descriptionVi}</p>
-                      <p className="text-ink-60/80">{product.descriptionEn}</p>
                       <ul className="mt-2 space-y-1 text-ink-60">
                         <li>Chất liệu: {product.material}</li>
                         <li>Form dáng: {product.fit}</li>

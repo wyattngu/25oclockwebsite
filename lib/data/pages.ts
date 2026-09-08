@@ -15,25 +15,19 @@ const freeShippingLine = `Miễn phí vận chuyển cho đơn hàng từ ${form
 
 export const staticPages: StaticPage[] = [
   {
-    slug: "about",
-    title: "Về 25 O'CLOCK",
-    intro:
-      "25 o'clock là khung giờ không tồn tại trên mặt đồng hồ — khoảnh khắc giữa ngày cũ và ngày mới, khi thành phố vẫn còn thức.",
-    sections: [
-      {
-        heading: "Câu chuyện",
-        paragraphs: [
-          "25 o'clock được thành lập năm 2024 tại TP. Hồ Chí Minh, bởi một nhóm nhỏ những người làm sáng tạo tin rằng thời trang tốt không cần quá nhiều chi tiết — chỉ cần đúng chất liệu, đúng form dáng, và đủ bền để mặc qua nhiều mùa.",
-          "Chúng tôi tập trung vào denim và da thật — hai chất liệu có 'tuổi thọ cảm xúc' dài nhất trong tủ đồ. Mỗi sản phẩm được sản xuất tại Việt Nam, số lượng giới hạn theo từng đợt để đảm bảo chất lượng kiểm soát được ở từng khâu.",
-        ],
-      },
-      {
-        heading: "Triết lý thiết kế",
-        paragraphs: [
-          "Ảnh dẫn dắt, chữ đứng sau. Không trang trí thừa. Sản phẩm là nhân vật chính — mọi thứ khác trên website chỉ nhằm mục đích giúp bạn nhìn rõ sản phẩm hơn.",
-        ],
-      },
+  slug: "about",
+title: "Về 25 O'CLOCK",
+intro:
+  "25 o'clock là giờ không có trên đồng hồ — khoảng thời gian bạn dành cho riêng mình.",
+sections: [
+  {
+    heading: "Câu chuyện",
+    paragraphs: [
+      "25 o'clock bắt đầu năm 2025 tại Hà Nội, từ một người thích quần áo và muốn chia sẻ điều đó bằng sản phẩm thay vì bằng lời nói.",
+      "Denim là thứ 25 o'clock chọn làm chất liệu chính và đại diện cho brand. Mỗi đợt sản phẩm đều có một số lượng nhất định để có thể kiểm soát được chất lượng tốt nhất trước khi đến tay khách hàng.",
     ],
+  },
+],
   },
   {
     slug: "size-guide",
@@ -76,7 +70,7 @@ export const staticPages: StaticPage[] = [
       {
         heading: "Vận chuyển quốc tế",
         paragraphs: [
-          "Đơn hàng quốc tế được xử lý ngay khi có thể, thời gian giao hàng khoảng 5–10 ngày làm việc (không tính Thứ Bảy, Chủ Nhật). Phí vận chuyển và thuế nhập khẩu (nếu có) được hiển thị trực tiếp tại trang instagram của 25 O'CLOCK",
+          "Đối với các đơn hàng quốc tế vui lòng liên hệ qua trang instagram của 25 O'CLOCK để được tư vấn cũng như hỗ trợ một cách chi tiết.",
         ],
       },
       {

@@ -63,8 +63,8 @@ export type Product = {
   variants: ProductVariant[];
   price: Money;
   compareAtPrice?: Money;
-  descriptionVi: string;
-  descriptionEn: string;
+  descriptionVi?: string;
+  descriptionEn?: string;
   /** Gạch đầu dòng đặc điểm nổi bật (khoá kéo, cúc, chi tiết may...) — hiện trong mục "Chi tiết" ở trang sản phẩm. Không bắt buộc. */
   details?: string[];
   material: string;

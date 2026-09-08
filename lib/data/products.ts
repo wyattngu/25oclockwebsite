@@ -37,9 +37,8 @@ const SAMPLE_02_SIZE_CHART: SizeChartRow[] = [
   { size: "L", length: "82 cm", width: "64 cm" },
 ];
 
-// Số đo thật, đo trên sản phẩm (bảng size chính thức của Midnight Bootcut).
+// Số đo thật, đo trên sản phẩm (bảng size chính thức của Midnight Bootcut — chỉ bán size 1/2).
 const MIDNIGHT_SIZE_CHART: SizeChartRow[] = [
-  { size: "0", waist: "78 cm", length: "105 cm", thigh: "32 cm", legOpening: "27 cm" },
   { size: "1", waist: "82 cm", length: "108 cm", thigh: "33 cm", legOpening: "28 cm" },
   { size: "2", waist: "88 cm", length: "112 cm", thigh: "34 cm", legOpening: "29 cm" },
 ];
@@ -68,8 +67,8 @@ type RawProduct = {
   modelInfo: string;
   collections: string[];
   createdAt: string;
-  descriptionVi: string;
-  descriptionEn: string;
+  descriptionVi?: string;
+  descriptionEn?: string;
   /** Gạch đầu dòng đặc điểm nổi bật, hiện trong mục "Chi tiết" ở trang sản phẩm — không bắt buộc, để trống nếu chưa có thông tin. */
   details?: string[];
   /** Danh sách size hết hàng của riêng sản phẩm này — hiện gạch đỏ, không bấm chọn được. Xem hướng dẫn ngay phía trên mảng RAW bên dưới. */
@@ -99,19 +98,26 @@ const RAW: RawProduct[] = [
     price: 790000,
     tones: ["charcoal", "ink", "charcoal", "stone"],
     labels: ["FRONT", "ON MODEL", "BACK", "DETAIL"],
-    sizes: ["0", "1", "2"],
-    unavailableSizes: ["0", "1"], // ví dụ: ["1"] nếu hết size 1
+    sizes: ["1", "2"],
+    unavailableSizes: [], // ví dụ: ["1"] nếu hết size 1
     sizeChart: MIDNIGHT_SIZE_CHART,
-    material: "Raw denim 14oz, 100% cotton",
-    care: "Hạn chế giặt trong 3–6 tháng đầu để lên form và bạc màu tự nhiên — Không giặt máy, không dùng chất tẩy mạnh / Avoid washing for the first 3–6 months to let the denim break in — avoid machine washing and harsh detergents",
-    fit: "Regular",
-    modelInfo: "Model cao 1m78, nặng 65kg, mặc size 1",
+    material: "Vải raw denim đen, bề mặt mộc, đứng form",
+    care:
+      "Hạn chế giặt trong 3–6 tháng đầu để lên form và bạc màu tự nhiên Không giặt máy, không dùng chất tẩy mạnh. " +
+      "Vì sản phẩm được làm từ vải raw denim chưa qua xử lý, nên cách bảo quản sẽ khác một chút so với vải denim thông thường. Để hạn chế tình trạng vải bị co rút hoặc bạc màu, mỗi đơn hàng shop đều gửi kèm một tờ CARE TAG hướng dẫn cách giặt và bảo quản quần. Bạn đọc và lưu ý giúp shop nhé ạ.",
+    fit: "Regular", // dáng bootcut/loe nhẹ gấu — xem chi tiết trong "details" bên dưới, trường này chỉ nhận Slim/Regular/Oversized
+    modelInfo: "Model cao 1m80, nặng 55kg, mặc size 1",
     collections: ["all", "bottoms", "new"],
     createdAt: "2026-08-28",
-    descriptionVi:
-      "Quần jean raw denim dáng bootcut, ống loe nhẹ từ đầu gối trở xuống, màu xanh đen (midnight) đặc trưng của vải nguyên bản chưa qua xử lý giặt mài. Form dáng cổ điển, phù hợp phối cùng boots hoặc giày da.",
-    descriptionEn:
-      "Bootcut raw denim jeans with a subtle flare from the knee down, in a deep midnight indigo unwashed denim. A classic silhouette that pairs well with boots or leather shoes.",
+    details: [
+      "Màu: Black",
+      "Form: Bootcut fit",
+      "Thiết kế bootcut – loe nhẹ gấu, dễ phối đồ",
+      "Đai tăng chỉnh eo kim loại phía sau",
+      "YKK zipper",
+      "Cúc kim loại donut",
+      "Signature baby blue tab",
+    ],
   },
   {
     code: "ECL",
@@ -126,15 +132,13 @@ const RAW: RawProduct[] = [
     unavailableSizes: ["2"], // ví dụ: ["1"] nếu hết size 1
     sizeChart: ECLIPSE_SIZE_CHART,
     material: "Vải raw denim đen, bề mặt mộc, đứng form",
-    care: "Hạn chế giặt trong 3–6 tháng đầu để lên form và bạc màu tự nhiên — Không giặt máy, không dùng chất tẩy mạnh / Avoid washing for the first 3–6 months to let the denim break in — avoid machine washing and harsh detergents",
+    care:
+      "Hạn chế giặt trong 3–6 tháng đầu để lên form và bạc màu tự nhiên Không giặt máy, không dùng chất tẩy mạnh. " +
+      "Vì sản phẩm được làm từ vải raw denim chưa qua xử lý, nên cách bảo quản sẽ khác một chút so với vải denim thông thường. Để hạn chế tình trạng vải bị co rút hoặc bạc màu, mỗi đơn hàng shop đều gửi kèm một tờ CARE TAG hướng dẫn cách giặt và bảo quản quần. Bạn đọc và lưu ý giúp shop nhé ạ.",
     fit: "Regular", // form ống đứng/straight fit — xem chi tiết trong "details" bên dưới, trường này chỉ nhận Slim/Regular/Oversized
     modelInfo: "Model cao 1m80, nặng 68kg, mặc size 2",
     collections: ["all", "bottoms", "new"],
     createdAt: "2026-08-30",
-    descriptionVi:
-      "Quần jean raw denim dáng straight ống đứng, màu đen, vải denim nguyên bản chưa qua xử lý giúp lên màu và nếp gấp tự nhiên theo thời gian sử dụng.",
-    descriptionEn:
-      "Straight-leg raw denim jeans in black. Unprocessed denim that develops natural fades and creases with wear.",
     details: [
       "Màu: Black",
       "Form: Straight fit",
@@ -166,10 +170,14 @@ const RAW: RawProduct[] = [
     modelInfo: "Model cao 1m78, nặng 65kg, mặc size M",
     collections: ["all", "tops", "new"],
     createdAt: "2026-08-25",
-    descriptionVi:
-      "Áo thun cotton 220gsm, phiên bản sample dùng để thử form dáng và chất liệu trước khi sản xuất đại trà. Form regular, dễ phối cùng denim hoặc quần vải.",
-    descriptionEn:
-      "220gsm cotton tee — a sample run used to test fit and fabric ahead of full production. Regular fit, easy to pair with denim or trousers.",
+    details: [
+      "Màu: Xám (Grey)",
+      "Form: Oversized",
+      "Chất liệu đã xử lý, hạn chế co rút",
+      "Zipper tape được xử lý bọc viền tỉ mỉ",
+      "Cúc kim loại donut 25 O'CLOCK",
+      "Hình in hiệu ứng faded & cracked",
+    ],
   },
   {
     code: "OLF",
@@ -184,16 +192,16 @@ const RAW: RawProduct[] = [
     unavailableSizes: [], // freesize nên chỉ có 1 size — hết hàng thì dùng "soldOut: true" ở dưới thay vì mục này
     sizeChart: [],
     // TODO: cập nhật đúng chất liệu/hướng dẫn bảo quản thật khi có — để tạm tránh ghi sai thông tin.
-    material: "Đang cập nhật",
+    material: "Len dệt mềm",
     care: "Đang cập nhật",
     fit: "Regular",
     modelInfo: "Freesize, phù hợp với đa số vòng đầu.",
     collections: ["all", "accessories", "new"],
     createdAt: "2026-09-04",
-    descriptionVi:
-      "Beanie form basic, đường phối \"flip\" gập vành đặc trưng. Freesize, dễ phối cùng nhiều outfit. (Mô tả tạm — cập nhật khi có thông tin đầy đủ.)",
-    descriptionEn:
-      'Basic-fit beanie with a signature "flip" folded brim. One size, easy to pair with most outfits. (Placeholder description — update once full details are available.)',
+    details: [
+      "Màu: Đen (Black)",
+      "Len dệt mềm, co giãn tốt, thoáng không ngứa, logo thêu OnlyFriends/25O’Clock, kim băng đính kèm, unisex.",
+    ],
   },
 ];
 
@@ -238,6 +246,26 @@ export function getProductByHandle(handle: string): Product | undefined {
 export function getProductsByCollection(handle: string): Product[] {
   if (handle === "all") return products;
   return products.filter((p) => p.collections.includes(handle));
+}
+
+// Thứ tự ưu tiên khi sắp size chữ — size lạ không có trong danh sách này (số đo
+// denim, FREESIZE...) tự rơi xuống cuối, sắp theo kiểu tự nhiên (xem sortSizes).
+const LETTER_SIZE_ORDER = ["XXS", "XS", "S", "M", "L", "XL", "XXL", "3XL"];
+
+/** Sắp size theo thứ tự dễ đọc: số tăng dần trước, rồi tới size chữ (S/M/L theo đúng thứ tự), cuối cùng là các size lạ khác (FREESIZE...). */
+export function sortSizes(sizes: string[]): string[] {
+  const numeric = sizes.filter((s) => !Number.isNaN(Number(s))).sort((a, b) => Number(a) - Number(b));
+  const letters = sizes
+    .filter((s) => LETTER_SIZE_ORDER.includes(s.toUpperCase()))
+    .sort((a, b) => LETTER_SIZE_ORDER.indexOf(a.toUpperCase()) - LETTER_SIZE_ORDER.indexOf(b.toUpperCase()));
+  const rest = sizes.filter((s) => !numeric.includes(s) && !letters.includes(s)).sort();
+  return [...numeric, ...letters, ...rest];
+}
+
+/** Danh sách size duy nhất, đã sắp, có mặt trong 1 danh sách sản phẩm — dùng để tự dựng bộ lọc "Size" theo đúng sản phẩm đang có (xem CollectionToolbar). */
+export function getAvailableSizes(items: Product[]): string[] {
+  const unique = new Set(items.flatMap((p) => p.variants.map((v) => v.size)));
+  return sortSizes([...unique]);
 }
 
 export function getRelatedProducts(product: Product, limit = 4): Product[] {

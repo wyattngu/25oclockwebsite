@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { collections, getCollectionByHandle } from "@/lib/data/collections";
-import { getProductsByCollection } from "@/lib/data/products";
+import { getAvailableSizes, getProductsByCollection } from "@/lib/data/products";
 import { withPhotosList } from "@/lib/utils/productImages";
 import type { Product } from "@/lib/types";
 import { CollectionToolbar } from "@/components/product/CollectionToolbar";
@@ -52,8 +52,12 @@ export default async function CollectionPage({ params, searchParams }: Props) {
   const sizes = Array.isArray(sizeParam) ? sizeParam : sizeParam ? [sizeParam] : [];
   const inStock = sp.instock === "1";
 
-  let items = getProductsByCollection(handle);
+  const collectionItems = getProductsByCollection(handle);
+  // Tính trước khi lọc theo size — bộ lọc luôn hiện đủ mọi size có trong
+  // collection này, không bị co lại theo lựa chọn hiện tại.
+  const availableSizes = getAvailableSizes(collectionItems);
 
+  let items = collectionItems;
   if (sizes.length > 0) {
     items = items.filter((p) => p.variants.some((v) => sizes.includes(v.size) && (!inStock || v.available)));
   } else if (inStock) {
@@ -68,7 +72,13 @@ export default async function CollectionPage({ params, searchParams }: Props) {
         <h1 className="text-[22px] font-medium uppercase tracking-[0.06em] md:text-[28px]">{collection.title}</h1>
         {collection.description ? <p className="mx-auto mt-2 max-w-xl text-[14px] text-ink-60">{collection.description}</p> : null}
       </header>
-      <CollectionToolbar resultCount={items.length} sort={sort} sizes={sizes} inStock={inStock} />
+      <CollectionToolbar
+        resultCount={items.length}
+        sort={sort}
+        sizes={sizes}
+        inStock={inStock}
+        availableSizes={availableSizes}
+      />
       <div className="pt-8">
         <LoadMoreGrid products={items} />
       </div>
