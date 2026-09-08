@@ -70,6 +70,7 @@ type RawProduct = {
   createdAt: string;
   descriptionVi: string;
   descriptionEn: string;
+  /** Danh sách size hết hàng của riêng sản phẩm này — hiện gạch đỏ, không bấm chọn được. Xem hướng dẫn ngay phía trên mảng RAW bên dưới. */
   unavailableSizes?: string[];
   soldOut?: boolean;
   lastSizes?: boolean;
@@ -78,6 +79,14 @@ type RawProduct = {
 // Danh mục sản phẩm thật hiện có: 2 quần jeans (Bottoms) + 1 áo thun (Tops).
 // Các collection khác (outerwear/accessories/leather/collab/sale) cố tình để trống —
 // ProductGrid tự hiển thị "Không có sản phẩm nào phù hợp." khi rỗng.
+//
+// ── ĐÁNH DẤU 1 SIZE ĐÃ HẾT HÀNG (gạch đỏ, không bấm chọn được) ─────────────
+// Tìm đúng sản phẩm bên dưới, thêm size đó (đúng chính tả như trong "sizes")
+// vào mảng "unavailableSizes" của sản phẩm đó. Ví dụ MIDNIGHT BOOTCUT hết
+// size "1": đổi `unavailableSizes: []` thành `unavailableSizes: ["1"]`.
+// Hết nhiều size thì liệt kê thoải mái: `unavailableSizes: ["1", "2"]`.
+// Muốn mở bán lại — xoá size đó ra khỏi mảng (hoặc để lại `[]`) là xong,
+// không cần sửa gì khác.
 const RAW: RawProduct[] = [
   {
     code: "MBC",
@@ -89,6 +98,7 @@ const RAW: RawProduct[] = [
     tones: ["charcoal", "ink", "charcoal", "stone"],
     labels: ["FRONT", "ON MODEL", "BACK", "DETAIL"],
     sizes: ["0", "1", "2"],
+    unavailableSizes: [], // ví dụ: ["1"] nếu hết size 1
     sizeChart: MIDNIGHT_SIZE_CHART,
     material: "Raw denim 14oz, 100% cotton",
     care: "Hạn chế giặt trong 3–6 tháng đầu để lên form và bạc màu tự nhiên — Không giặt máy, không dùng chất tẩy mạnh / Avoid washing for the first 3–6 months to let the denim break in — avoid machine washing and harsh detergents",
@@ -111,6 +121,7 @@ const RAW: RawProduct[] = [
     tones: ["ink", "charcoal", "ink", "stone"],
     labels: ["FRONT", "ON MODEL", "BACK", "DETAIL"],
     sizes: ["1", "2", "3"],
+    unavailableSizes: [], // ví dụ: ["1"] nếu hết size 1
     sizeChart: ECLIPSE_SIZE_CHART,
     material: "Raw denim 13oz, 100% cotton",
     care: "Hạn chế giặt trong 3–6 tháng đầu để lên form và bạc màu tự nhiên — Không giặt máy, không dùng chất tẩy mạnh / Avoid washing for the first 3–6 months to let the denim break in — avoid machine washing and harsh detergents",
@@ -133,6 +144,7 @@ const RAW: RawProduct[] = [
     tones: ["sand", "ink", "sand"],
     labels: ["FRONT", "ON MODEL", "DETAIL"],
     sizes: ["M", "L"],
+    unavailableSizes: [], // ví dụ: ["M"] nếu hết size M
     sizeChart: SAMPLE_02_SIZE_CHART,
     material: "Cotton 220gsm",
     care: "Giặt máy nước lạnh, lộn trái trước khi giặt / Machine wash cold, inside out",
@@ -155,6 +167,7 @@ const RAW: RawProduct[] = [
     tones: ["ink", "stone", "ink"],
     labels: ["FRONT", "ON MODEL", "DETAIL"],
     sizes: SIZE_SETS.onesize,
+    unavailableSizes: [], // freesize nên chỉ có 1 size — hết hàng thì dùng "soldOut: true" ở dưới thay vì mục này
     sizeChart: [],
     // TODO: cập nhật đúng chất liệu/hướng dẫn bảo quản thật khi có — để tạm tránh ghi sai thông tin.
     material: "Đang cập nhật",

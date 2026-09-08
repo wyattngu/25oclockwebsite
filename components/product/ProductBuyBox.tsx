@@ -95,12 +95,12 @@ export function ProductBuyBox({ product, initialVariantId }: { product: Product;
                 aria-pressed={isSelected}
                 className={`relative h-11 min-w-11 border px-3 text-[13px] transition-colors ${
                   isSelected ? "border-ink bg-ink text-white" : "border-line text-ink hover:border-ink"
-                } ${!v.available ? "text-ink-60/50 pointer-events-none overflow-hidden" : ""}`}
+                } ${!v.available ? "pointer-events-none overflow-hidden text-ink-60/60" : ""}`}
               >
                 {v.size}
                 {!v.available ? (
                   <span className="absolute inset-0 flex items-center justify-center">
-                    <span className="h-px w-[140%] rotate-[-20deg] bg-ink-60/40" />
+                    <span className="h-[1.5px] w-[140%] rotate-[-20deg] bg-sale" />
                   </span>
                 ) : null}
               </button>
