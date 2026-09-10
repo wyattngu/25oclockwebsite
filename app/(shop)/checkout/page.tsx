@@ -27,6 +27,7 @@ import { company } from "@/lib/data/company";
 import { provinces, getDistrictsByProvinceCode, getWardsByDistrictCode } from "@/lib/data/vietnamLocations";
 import type { CartLine, OrderPayload } from "@/lib/types";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
+import { haptic } from "@/lib/utils/haptics";
 
 type OrderSummary = {
   lines: CartLine[];
@@ -174,6 +175,7 @@ export default function CheckoutPage() {
     }
     setEmailError(null);
     submittingRef.current = true;
+    haptic("success");
     const orderId = makeOrderId();
     notifyOrder(orderId, paymentLabel);
     // Chụp lại giỏ hàng trước khi clearCart() xoá sạch — bước xác nhận cần hiện

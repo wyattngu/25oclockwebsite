@@ -10,6 +10,7 @@ import { SizeGuideDrawer } from "@/components/product/SizeGuideDrawer";
 import { Button } from "@/components/ui/Button";
 import { IconMinus, IconPlus } from "@/components/ui/icons";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
+import { haptic } from "@/lib/utils/haptics";
 
 export function ProductBuyBox({ product, initialVariantId }: { product: Product; initialVariantId?: string }) {
   const router = useRouter();
@@ -46,17 +47,20 @@ export function ProductBuyBox({ product, initialVariantId }: { product: Product;
   );
 
   function selectVariant(id: string) {
+    haptic("tap");
     setSelectedId(id);
     router.replace(`${pathname}?variant=${id}`, { scroll: false });
   }
 
   function handleAddToCart() {
     if (!selectedVariant.available) return;
+    haptic("success");
     addToCart(product, selectedVariant, quantity);
   }
 
   function handleBuyNow() {
     if (!selectedVariant.available) return;
+    haptic("success");
     addToCart(product, selectedVariant, quantity);
     router.push("/checkout");
   }
@@ -127,7 +131,10 @@ export function ProductBuyBox({ product, initialVariantId }: { product: Product;
           <button
             type="button"
             aria-label={t.product.quantityDecrease}
-            onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+            onClick={() => {
+              haptic("tap");
+              setQuantity((q) => Math.max(1, q - 1));
+            }}
             className="flex h-12 w-10 items-center justify-center hover:bg-bg-alt"
           >
             <IconMinus className="h-3.5 w-3.5" />
@@ -136,7 +143,10 @@ export function ProductBuyBox({ product, initialVariantId }: { product: Product;
           <button
             type="button"
             aria-label={t.product.quantityIncrease}
-            onClick={() => setQuantity((q) => Math.min(10, q + 1))}
+            onClick={() => {
+              haptic("tap");
+              setQuantity((q) => Math.min(10, q + 1));
+            }}
             className="flex h-12 w-10 items-center justify-center hover:bg-bg-alt"
           >
             <IconPlus className="h-3.5 w-3.5" />

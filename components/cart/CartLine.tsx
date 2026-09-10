@@ -4,6 +4,7 @@ import { formatPrice } from "@/lib/utils/formatPrice";
 import { IconMinus, IconPlus, IconClose } from "@/components/ui/icons";
 import { useCart } from "@/lib/store/cart-context";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
+import { haptic } from "@/lib/utils/haptics";
 
 export function CartLine({ line }: { line: CartLineType }) {
   const { updateQuantity, removeLine } = useCart();
@@ -23,7 +24,10 @@ export function CartLine({ line }: { line: CartLineType }) {
           <button
             type="button"
             aria-label={t.cart.removeItem}
-            onClick={() => removeLine(line.lineId)}
+            onClick={() => {
+              haptic("remove");
+              removeLine(line.lineId);
+            }}
             className="p-1 text-ink-60 hover:text-ink"
           >
             <IconClose className="h-3.5 w-3.5" />
@@ -34,7 +38,10 @@ export function CartLine({ line }: { line: CartLineType }) {
             <button
               type="button"
               aria-label={t.product.quantityDecrease}
-              onClick={() => updateQuantity(line.lineId, line.quantity - 1)}
+              onClick={() => {
+                haptic("tap");
+                updateQuantity(line.lineId, line.quantity - 1);
+              }}
               className="flex h-8 w-8 items-center justify-center hover:bg-bg-alt"
             >
               <IconMinus className="h-3 w-3" />
@@ -43,7 +50,10 @@ export function CartLine({ line }: { line: CartLineType }) {
             <button
               type="button"
               aria-label={t.product.quantityIncrease}
-              onClick={() => updateQuantity(line.lineId, line.quantity + 1)}
+              onClick={() => {
+                haptic("tap");
+                updateQuantity(line.lineId, line.quantity + 1);
+              }}
               className="flex h-8 w-8 items-center justify-center hover:bg-bg-alt"
             >
               <IconPlus className="h-3 w-3" />
