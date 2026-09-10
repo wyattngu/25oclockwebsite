@@ -60,7 +60,11 @@ export async function createOrder(payload: OrderPayload): Promise<{ ok: boolean;
       payment_method: payload.paymentMethod,
       customer_name: payload.customer.name,
       customer_phone: payload.customer.phone,
-      customer_email: payload.customer.email,
+      // .trim().toLowerCase() — getOrdersByEmail() so khớp email kiểu chữ thường tuyệt đối
+      // (cột "text" thường, không phải "citext"/lower() index), lưu khác kiểu hoa/thường là
+      // đơn "biến mất" khỏi trang Tài khoản dù đã lưu đúng. Chuẩn hoá lại ở đây (không chỉ ở
+      // client tại app/(shop)/checkout/page.tsx) để chắc chắn dù request tới thẳng API này.
+      customer_email: payload.customer.email.trim().toLowerCase(),
       customer_address: payload.customer.address,
       customer_city: payload.customer.city || null,
       customer_district: payload.customer.district || null,

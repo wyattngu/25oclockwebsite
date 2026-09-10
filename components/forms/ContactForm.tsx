@@ -29,7 +29,7 @@ export function ContactForm() {
         <Input required placeholder={t.checkout.fullName} />
         <Input required type="tel" placeholder={t.checkout.phone} />
       </div>
-      <Input required type="email" placeholder={t.checkout.email} />
+      <Input required type="email" autoCapitalize="none" autoCorrect="off" spellCheck={false} placeholder={t.checkout.email} />
       <Textarea required rows={4} placeholder={t.contact.messageContent} />
       <Button type="submit" className="px-8">
         {t.contact.submit}

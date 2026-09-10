@@ -28,6 +28,9 @@ export function NewsletterForm() {
         <input
           type="email"
           required
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
           value={email}
           onChange={(e) => {
             setEmail(e.target.value);

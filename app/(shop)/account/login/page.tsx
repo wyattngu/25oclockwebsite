@@ -50,6 +50,9 @@ function LoginForm() {
         <Input
           type="email"
           required
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
           placeholder={t.checkout.email}
           value={email}
           onChange={(e) => setEmail(e.target.value)}

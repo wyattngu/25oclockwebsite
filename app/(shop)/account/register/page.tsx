@@ -62,6 +62,9 @@ export default function RegisterPage() {
         <Input
           type="email"
           required
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
           placeholder={t.checkout.email}
           value={form.email}
           onChange={(e) => update("email", e.target.value)}
