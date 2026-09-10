@@ -3,6 +3,7 @@
 import { AnimatePresence, motion, type TargetAndTransition } from "framer-motion";
 import { useEffect } from "react";
 import { IconClose } from "@/components/ui/icons";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 type Side = "right" | "bottom";
 
@@ -21,6 +22,7 @@ const variantsBySide: Record<Side, { hidden: TargetAndTransition; visible: Targe
 };
 
 export function Drawer({ isOpen, onClose, side = "right", title, children, widthClassName }: Props) {
+  const { dict: t } = useLocale();
   useEffect(() => {
     if (!isOpen) return;
     const previous = document.body.style.overflow;
@@ -66,13 +68,13 @@ export function Drawer({ isOpen, onClose, side = "right", title, children, width
             {title ? (
               <div className="flex items-center justify-between border-b border-line px-5 py-4">
                 <h2 className="nav-link">{title}</h2>
-                <button aria-label="Đóng" onClick={onClose} className="p-1">
+                <button aria-label={t.common.close} onClick={onClose} className="p-1">
                   <IconClose className="h-5 w-5" />
                 </button>
               </div>
             ) : (
               <button
-                aria-label="Đóng"
+                aria-label={t.common.close}
                 onClick={onClose}
                 className="absolute right-4 top-4 z-10 p-1 text-ink"
               >

@@ -1,12 +1,16 @@
+"use client";
+
 import type { Product } from "@/lib/types";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Reveal } from "@/components/ui/Reveal";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 export function ProductGrid({ products }: { products: Product[] }) {
+  const { dict: t } = useLocale();
   if (products.length === 0) {
     return (
       <div className="py-24 text-center text-[15px] text-ink-60">
-        Không có sản phẩm nào phù hợp.
+        {t.collection.noProducts}
       </div>
     );
   }

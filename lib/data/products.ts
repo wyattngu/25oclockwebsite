@@ -39,8 +39,9 @@ const SAMPLE_02_SIZE_CHART: SizeChartRow[] = [
 
 // Số đo thật, đo trên sản phẩm (bảng size chính thức của Midnight Bootcut — chỉ bán size 1/2).
 const MIDNIGHT_SIZE_CHART: SizeChartRow[] = [
-  { size: "1", waist: "82 cm", length: "108 cm", thigh: "33 cm", legOpening: "28 cm" },
-  { size: "2", waist: "88 cm", length: "112 cm", thigh: "34 cm", legOpening: "29 cm" },
+  { size: "0", waist: "78 cm", length: "104 cm", thigh: "32 cm", legOpening: "27 cm" },
+  { size: "1", waist: "82 cm", length: "106 cm", thigh: "33 cm", legOpening: "28 cm" },
+  { size: "2", waist: "88 cm", length: "110 cm", thigh: "34 cm", legOpening: "29 cm" },
 ];
 
 const ECLIPSE_SIZE_CHART: SizeChartRow[] = [
@@ -62,15 +63,20 @@ type RawProduct = {
   sizes: string[];
   sizeChart: SizeChartRow[];
   material: string;
+  materialEn?: string;
   care: string;
+  careEn?: string;
   fit: Product["fit"];
   modelInfo: string;
+  modelInfoEn?: string;
   collections: string[];
   createdAt: string;
   descriptionVi?: string;
   descriptionEn?: string;
   /** Gạch đầu dòng đặc điểm nổi bật, hiện trong mục "Chi tiết" ở trang sản phẩm — không bắt buộc, để trống nếu chưa có thông tin. */
   details?: string[];
+  /** Bản tiếng Anh song song với "details" — cùng thứ tự, cùng số dòng. */
+  detailsEn?: string[];
   /** Danh sách size hết hàng của riêng sản phẩm này — hiện gạch đỏ, không bấm chọn được. Xem hướng dẫn ngay phía trên mảng RAW bên dưới. */
   unavailableSizes?: string[];
   soldOut?: boolean;
@@ -98,15 +104,20 @@ const RAW: RawProduct[] = [
     price: 790000,
     tones: ["charcoal", "ink", "charcoal", "stone"],
     labels: ["FRONT", "ON MODEL", "BACK", "DETAIL"],
-    sizes: ["1", "2"],
-    unavailableSizes: [], // ví dụ: ["1"] nếu hết size 1
+    sizes: ["0","1", "2"],
+    unavailableSizes: ["0","1"], // ví dụ: ["1"] nếu hết size 1
     sizeChart: MIDNIGHT_SIZE_CHART,
     material: "Vải raw denim đen, bề mặt mộc, đứng form",
+    materialEn: "Black raw denim, unwashed finish, stiff hand-feel",
     care:
       "Hạn chế giặt trong 3–6 tháng đầu để lên form và bạc màu tự nhiên Không giặt máy, không dùng chất tẩy mạnh. " +
       "Vì sản phẩm được làm từ vải raw denim chưa qua xử lý, nên cách bảo quản sẽ khác một chút so với vải denim thông thường. Để hạn chế tình trạng vải bị co rút hoặc bạc màu, mỗi đơn hàng shop đều gửi kèm một tờ CARE TAG hướng dẫn cách giặt và bảo quản quần. Bạn đọc và lưu ý giúp shop nhé ạ.",
+    careEn:
+      "Avoid washing for the first 3–6 months to let the denim break in and fade naturally. No machine wash, no harsh detergents. " +
+      "Because this piece is made from untreated raw denim, care is a little different from regular denim. To help prevent shrinking or uneven fading, every order ships with a CARE TAG with washing and care instructions — please read and keep it handy.",
     fit: "Regular", // dáng bootcut/loe nhẹ gấu — xem chi tiết trong "details" bên dưới, trường này chỉ nhận Slim/Regular/Oversized
-    modelInfo: "Model cao 1m80, nặng 55kg, mặc size 1",
+    modelInfo: "Model cao 1m65, nặng 47kg, mặc size 0",
+    modelInfoEn: "Model is 165cm / 47kg, wearing size 0",
     collections: ["all", "bottoms", "new"],
     createdAt: "2026-08-28",
     details: [
@@ -116,6 +127,15 @@ const RAW: RawProduct[] = [
       "Đai tăng chỉnh eo kim loại phía sau",
       "YKK zipper",
       "Cúc kim loại donut",
+      "Signature baby blue tab",
+    ],
+    detailsEn: [
+      "Color: Black",
+      "Fit: Bootcut",
+      "Bootcut silhouette with a slight flare at the hem, easy to style",
+      "Metal waist adjuster tabs on the back",
+      "YKK zipper",
+      "Donut metal button",
       "Signature baby blue tab",
     ],
   },
@@ -132,11 +152,16 @@ const RAW: RawProduct[] = [
     unavailableSizes: ["2"], // ví dụ: ["1"] nếu hết size 1
     sizeChart: ECLIPSE_SIZE_CHART,
     material: "Vải raw denim đen, bề mặt mộc, đứng form",
+    materialEn: "Black raw denim, unwashed finish, stiff hand-feel",
     care:
       "Hạn chế giặt trong 3–6 tháng đầu để lên form và bạc màu tự nhiên Không giặt máy, không dùng chất tẩy mạnh. " +
       "Vì sản phẩm được làm từ vải raw denim chưa qua xử lý, nên cách bảo quản sẽ khác một chút so với vải denim thông thường. Để hạn chế tình trạng vải bị co rút hoặc bạc màu, mỗi đơn hàng shop đều gửi kèm một tờ CARE TAG hướng dẫn cách giặt và bảo quản quần. Bạn đọc và lưu ý giúp shop nhé ạ.",
+    careEn:
+      "Avoid washing for the first 3–6 months to let the denim break in and fade naturally. No machine wash, no harsh detergents. " +
+      "Because this piece is made from untreated raw denim, care is a little different from regular denim. To help prevent shrinking or uneven fading, every order ships with a CARE TAG with washing and care instructions — please read and keep it handy.",
     fit: "Regular", // form ống đứng/straight fit — xem chi tiết trong "details" bên dưới, trường này chỉ nhận Slim/Regular/Oversized
-    modelInfo: "Model cao 1m80, nặng 68kg, mặc size 2",
+    modelInfo: "Model cao 1m69, nặng 50kg, mặc size 1",
+    modelInfoEn: "Model is 169cm / 50kg, wearing size 1",
     collections: ["all", "bottoms", "new"],
     createdAt: "2026-08-30",
     details: [
@@ -150,6 +175,18 @@ const RAW: RawProduct[] = [
       "Stainless steel lighter clip ở túi sau",
       "Distressed tự nhiên ở viền túi",
       "Lót túi được làm toàn bộ bằng crinkle nylon",
+    ],
+    detailsEn: [
+      "Color: Black",
+      "Fit: Straight fit",
+      "YKK zipper",
+      "Zipper tape carefully edge-bound",
+      "25 O'CLOCK donut metal button",
+      "Signature baby blue tab",
+      "Signature front strap",
+      "Stainless steel lighter clip on the back pocket",
+      "Natural distressing along the pocket edges",
+      "Pocket bags fully lined in crinkle nylon",
     ],
   },
   {
@@ -165,9 +202,14 @@ const RAW: RawProduct[] = [
     unavailableSizes: [], // ví dụ: ["M"] nếu hết size M
     sizeChart: SAMPLE_02_SIZE_CHART,
     material: "Cotton 220gsm",
+    materialEn: "220gsm cotton",
     care: "Giặt máy nước lạnh, lộn trái trước khi giặt / Machine wash cold, inside out",
+    careEn: "Machine wash cold, inside out",
     fit: "Regular",
-    modelInfo: "Model cao 1m78, nặng 65kg, mặc size M",
+    // TODO: điền đúng chiều cao/cân nặng/size model thật khi có — "..." cũ hiện
+    // nguyên văn ra trang Hướng dẫn chọn size, trông như lỗi.
+    modelInfo: "Đang cập nhật",
+    modelInfoEn: "Updating soon",
     collections: ["all", "tops", "new"],
     createdAt: "2026-08-25",
     details: [
@@ -177,6 +219,14 @@ const RAW: RawProduct[] = [
       "Zipper tape được xử lý bọc viền tỉ mỉ",
       "Cúc kim loại donut 25 O'CLOCK",
       "Hình in hiệu ứng faded & cracked",
+    ],
+    detailsEn: [
+      "Color: Grey",
+      "Fit: Oversized",
+      "Pre-treated fabric, resists shrinking",
+      "Zipper tape carefully edge-bound",
+      "25 O'CLOCK donut metal button",
+      "Faded & cracked print effect",
     ],
   },
   {
@@ -193,14 +243,21 @@ const RAW: RawProduct[] = [
     sizeChart: [],
     // TODO: cập nhật đúng chất liệu/hướng dẫn bảo quản thật khi có — để tạm tránh ghi sai thông tin.
     material: "Len dệt mềm",
+    materialEn: "Soft knit wool",
     care: "Đang cập nhật",
+    careEn: "Updating soon",
     fit: "Regular",
     modelInfo: "Freesize, phù hợp với đa số vòng đầu.",
+    modelInfoEn: "One-size, fits most head sizes.",
     collections: ["all", "accessories", "new"],
     createdAt: "2026-09-04",
     details: [
       "Màu: Đen (Black)",
       "Len dệt mềm, co giãn tốt, thoáng không ngứa, logo thêu OnlyFriends/25O’Clock, kim băng đính kèm, unisex.",
+    ],
+    detailsEn: [
+      "Color: Black",
+      "Soft knit wool, stretchy, breathable and non-itchy, embroidered OnlyFriends/25 O'Clock logo, pin included, unisex.",
     ],
   },
 ];
@@ -222,11 +279,16 @@ export const products: Product[] = RAW.map((r) => {
     descriptionVi: r.descriptionVi,
     descriptionEn: r.descriptionEn,
     details: r.details,
+    detailsEn: r.detailsEn,
     material: r.material,
+    materialEn: r.materialEn,
     care: r.care,
+    careEn: r.careEn,
     madeIn: "Việt Nam",
+    madeInEn: "Vietnam",
     fit: r.fit,
     modelInfo: r.modelInfo,
+    modelInfoEn: r.modelInfoEn,
     sizeChart: r.sizeChart,
     collections: r.collections,
     createdAt: r.createdAt,
@@ -246,26 +308,6 @@ export function getProductByHandle(handle: string): Product | undefined {
 export function getProductsByCollection(handle: string): Product[] {
   if (handle === "all") return products;
   return products.filter((p) => p.collections.includes(handle));
-}
-
-// Thứ tự ưu tiên khi sắp size chữ — size lạ không có trong danh sách này (số đo
-// denim, FREESIZE...) tự rơi xuống cuối, sắp theo kiểu tự nhiên (xem sortSizes).
-const LETTER_SIZE_ORDER = ["XXS", "XS", "S", "M", "L", "XL", "XXL", "3XL"];
-
-/** Sắp size theo thứ tự dễ đọc: số tăng dần trước, rồi tới size chữ (S/M/L theo đúng thứ tự), cuối cùng là các size lạ khác (FREESIZE...). */
-export function sortSizes(sizes: string[]): string[] {
-  const numeric = sizes.filter((s) => !Number.isNaN(Number(s))).sort((a, b) => Number(a) - Number(b));
-  const letters = sizes
-    .filter((s) => LETTER_SIZE_ORDER.includes(s.toUpperCase()))
-    .sort((a, b) => LETTER_SIZE_ORDER.indexOf(a.toUpperCase()) - LETTER_SIZE_ORDER.indexOf(b.toUpperCase()));
-  const rest = sizes.filter((s) => !numeric.includes(s) && !letters.includes(s)).sort();
-  return [...numeric, ...letters, ...rest];
-}
-
-/** Danh sách size duy nhất, đã sắp, có mặt trong 1 danh sách sản phẩm — dùng để tự dựng bộ lọc "Size" theo đúng sản phẩm đang có (xem CollectionToolbar). */
-export function getAvailableSizes(items: Product[]): string[] {
-  const unique = new Set(items.flatMap((p) => p.variants.map((v) => v.size)));
-  return sortSizes([...unique]);
 }
 
 export function getRelatedProducts(product: Product, limit = 4): Product[] {

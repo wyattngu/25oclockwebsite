@@ -4,6 +4,7 @@ import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect } from "react";
 import { IconChevronDown, IconClose } from "@/components/ui/icons";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 type Props = {
   photos: string[];
@@ -20,6 +21,7 @@ function Arrow({ direction, className }: { direction: "left" | "right"; classNam
 }
 
 export function ImageLightbox({ photos, index, onIndexChange, isOpen, onClose, alt }: Props) {
+  const { dict: t } = useLocale();
   useEffect(() => {
     if (!isOpen) return;
     const previous = document.body.style.overflow;
@@ -49,7 +51,7 @@ export function ImageLightbox({ photos, index, onIndexChange, isOpen, onClose, a
         >
           <button
             type="button"
-            aria-label="Đóng"
+            aria-label={t.common.close}
             onClick={onClose}
             className="absolute right-4 top-4 z-10 p-2 text-white md:right-8 md:top-6"
           >
@@ -65,7 +67,7 @@ export function ImageLightbox({ photos, index, onIndexChange, isOpen, onClose, a
           {index > 0 ? (
             <button
               type="button"
-              aria-label="Ảnh trước"
+              aria-label={t.product.previousImage}
               onClick={(e) => {
                 e.stopPropagation();
                 onIndexChange(index - 1);
@@ -78,7 +80,7 @@ export function ImageLightbox({ photos, index, onIndexChange, isOpen, onClose, a
           {index < photos.length - 1 ? (
             <button
               type="button"
-              aria-label="Ảnh sau"
+              aria-label={t.product.nextImage}
               onClick={(e) => {
                 e.stopPropagation();
                 onIndexChange(index + 1);
@@ -95,7 +97,7 @@ export function ImageLightbox({ photos, index, onIndexChange, isOpen, onClose, a
           >
             <Image
               src={photos[index]}
-              alt={`${alt} — ảnh phóng to ${index + 1}`}
+              alt={t.product.enlargedImageAlt(alt, index + 1)}
               fill
               sizes="92vw"
               className="object-contain"

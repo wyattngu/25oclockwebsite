@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 export function ShareButtons({ url, title }: { url: string; title: string }) {
+  const { dict: t } = useLocale();
   const [copied, setCopied] = useState(false);
 
   async function copyLink() {
@@ -20,7 +22,7 @@ export function ShareButtons({ url, title }: { url: string; title: string }) {
 
   return (
     <div className="flex items-center gap-4 text-[12px] uppercase tracking-wider text-ink-60">
-      <span>Chia sẻ:</span>
+      <span>{t.share.label}</span>
       <a href={fbHref} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-ink">
         Facebook
       </a>
@@ -28,7 +30,7 @@ export function ShareButtons({ url, title }: { url: string; title: string }) {
         Messenger
       </a>
       <button type="button" onClick={copyLink} className="underline underline-offset-2 hover:text-ink">
-        {copied ? "Đã sao chép" : "Sao chép link"}
+        {copied ? t.share.copied : t.share.copyLink}
       </button>
       <span className="sr-only" aria-label={title} />
     </div>

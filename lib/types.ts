@@ -67,11 +67,17 @@ export type Product = {
   descriptionEn?: string;
   /** Gạch đầu dòng đặc điểm nổi bật (khoá kéo, cúc, chi tiết may...) — hiện trong mục "Chi tiết" ở trang sản phẩm. Không bắt buộc. */
   details?: string[];
+  /** Bản tiếng Anh song song với "details" — cùng thứ tự, cùng số dòng. Xem lib/data/products.ts. */
+  detailsEn?: string[];
   material: string;
+  materialEn?: string;
   care: string;
+  careEn?: string;
   madeIn: string;
+  madeInEn?: string;
   fit: "Slim" | "Regular" | "Oversized";
   modelInfo: string;
+  modelInfoEn?: string;
   sizeChart: SizeChartRow[];
   collections: string[]; // collection handles
   createdAt: string; // ISO date, dùng cho sắp xếp "Mới nhất"
@@ -95,6 +101,8 @@ export type CartLine = {
   size: string;
   price: Money;
   image: ProductImage;
+  /** Ảnh thật (ảnh đầu tiên của sản phẩm), nếu có — ưu tiên hiện cái này thay vì "image" (chỉ là placeholder theo tông màu). */
+  photo?: string;
   quantity: number;
 };
 

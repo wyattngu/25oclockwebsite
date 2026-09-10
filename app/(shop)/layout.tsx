@@ -1,5 +1,8 @@
 import { cookies } from "next/headers";
 import { CartProvider } from "@/lib/store/cart-context";
+import { LocaleProvider } from "@/lib/i18n/LocaleProvider";
+import { getLocale, hasChosenLocale } from "@/lib/i18n/locale";
+import { LanguagePopup } from "@/components/layout/LanguagePopup";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CartDrawer } from "@/components/cart/CartDrawer";
@@ -23,18 +26,23 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
   // Đọc trước ảnh thật của tất cả sản phẩm ở server, truyền xuống cho ô tìm
   // kiếm (chạy ở client, không tự đọc file ảnh được) — xem SearchOverlay.tsx.
   const productPhotos = getProductPhotosMap(getAllProducts().map((p) => p.handle));
+  const locale = await getLocale();
+  const localeChosen = await hasChosenLocale();
 
   return (
-    <CartProvider>
-      <Header isLoggedIn={isLoggedIn} collectionCovers={collectionCovers} productPhotos={productPhotos} />
-      <MainOffset>
-        <PageTransition>{children}</PageTransition>
-      </MainOffset>
-      <Footer />
-      <CartDrawer />
-      <AddedToast />
-      <FloatingInstagram />
-      <CursorSparkles />
-    </CartProvider>
+    <LocaleProvider initialLocale={locale} initialHasChosen={localeChosen}>
+      <CartProvider>
+        <LanguagePopup />
+        <Header isLoggedIn={isLoggedIn} collectionCovers={collectionCovers} productPhotos={productPhotos} />
+        <MainOffset>
+          <PageTransition>{children}</PageTransition>
+        </MainOffset>
+        <Footer />
+        <CartDrawer />
+        <AddedToast />
+        <FloatingInstagram />
+        <CursorSparkles />
+      </CartProvider>
+    </LocaleProvider>
   );
 }

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
 import "./globals.css";
+import { getT, getLocale } from "@/lib/i18n/locale";
 
 const inter = Inter({
   subsets: ["latin", "vietnamese"],
@@ -9,30 +10,34 @@ const inter = Inter({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL("https://25oclock.vn"),
-  title: {
-    default: "25 O'Clock — Thời trang denim & da thật",
-    template: "%s · 25 O'Clock",
-  },
-  description:
-    "25 o'clock — thương hiệu thời trang denim & da thật, sản xuất tại Việt Nam. Gallery tối giản, sản phẩm là nhân vật chính.",
-  openGraph: {
-    title: "25 O'Clock",
-    description: "Thời trang denim & da thật, sản xuất tại Việt Nam.",
-    type: "website",
-    locale: "vi_VN",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  const locale = await getLocale();
+  return {
+    metadataBase: new URL("https://25oclockhome.com"),
+    title: {
+      default: t.site.titleDefault,
+      template: "%s · 25 O'Clock",
+    },
+    description: t.site.description,
+    openGraph: {
+      title: "25 O'Clock",
+      description: t.site.ogDescription,
+      type: "website",
+      locale: locale === "en" ? "en_US" : "vi_VN",
+    },
+  };
+}
 
 /**
  * Layout gốc — chỉ dựng khung <html>/<body> + font. Chrome của cửa hàng (Header,
  * Footer, CartDrawer) nằm ở app/(shop)/layout.tsx; trang quản trị có khung riêng
  * ở app/admin/layout.tsx — để trang admin không hiện giỏ hàng/menu khách hàng.
  */
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const locale = await getLocale();
   return (
-    <html lang="vi" className={inter.variable}>
+    <html lang={locale} className={inter.variable}>
       <body>
         <NextTopLoader color="#000000" height={2} showSpinner={false} shadow={false} />
         {children}

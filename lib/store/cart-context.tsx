@@ -9,6 +9,7 @@ export type AddedToastData = {
   size: string;
   quantity: number;
   tone: CartLine["image"]["tone"];
+  photo?: string;
 };
 
 type AddToCartOptions = {
@@ -91,6 +92,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           size: variant.size,
           price: variant.price,
           image: product.images[0],
+          photo: product.photos?.[0],
           quantity,
         };
         return [...prev, newLine];
@@ -99,7 +101,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       if (openDrawer) {
         setIsOpen(true);
       } else {
-        setToast({ id: Date.now(), title: product.title, size: variant.size, quantity, tone: product.images[0].tone });
+        setToast({
+          id: Date.now(),
+          title: product.title,
+          size: variant.size,
+          quantity,
+          tone: product.images[0].tone,
+          photo: product.photos?.[0],
+        });
       }
     },
     [],

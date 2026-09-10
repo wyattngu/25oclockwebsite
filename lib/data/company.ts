@@ -2,6 +2,13 @@ export const company = {
   email: "25oclockhome@gmail.com",
   instagram: { label: "@25oclock.home", url: "https://instagram.com/25oclock.home" },
   freeShippingThreshold: 1000000,
+  /**
+   * Phí vận chuyển khi đơn CHƯA đạt mốc miễn phí ở trên — tách riêng nội thành Hà Nội
+   * (mã tỉnh/thành = 1 trong lib/data/vietnamLocations.ts) và các tỉnh thành khác.
+   * Dùng ở app/(shop)/checkout/page.tsx.
+   */
+  shippingFeeHanoi: 18000,
+  shippingFeeOtherProvinces: 35000,
   /** Số ngày được đổi/trả hàng kể từ khi nhận — dùng chung ở trang sản phẩm và trang chính sách, sửa 1 chỗ này là đủ. */
   returnWindowDays: 3,
   /**
@@ -23,7 +30,7 @@ export const company = {
    *
    * Đang để tạm là email bạn dùng đăng ký Resend — vì khi CHƯA xác minh domain
    * riêng trên Resend, "from: onboarding@resend.dev" chỉ được phép gửi tới đúng
-   * email đó. Muốn nhận thông báo ở email khác (ví dụ hello@25oclock.vn), vào
+   * email đó. Muốn nhận thông báo ở email khác (ví dụ hello@25oclockhome.com), vào
    * resend.com/domains xác minh domain đó rồi đổi "from" trong
    * app/api/orders/route.ts sang địa chỉ thuộc domain vừa xác minh.
    */

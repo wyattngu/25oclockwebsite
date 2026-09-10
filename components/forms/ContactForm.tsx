@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 export function ContactForm() {
+  const { dict: t } = useLocale();
   const [sent, setSent] = useState(false);
 
   function handleSubmit(e: React.FormEvent) {
@@ -16,7 +18,7 @@ export function ContactForm() {
   if (sent) {
     return (
       <div className="border border-line px-6 py-10 text-center">
-        <p className="text-[15px]">Cảm ơn bạn đã liên hệ, 25 o&apos;clock sẽ phản hồi trong 24 giờ làm việc.</p>
+        <p className="text-[15px]">{t.contact.thankYou}</p>
       </div>
     );
   }
@@ -24,13 +26,13 @@ export function ContactForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-        <Input required placeholder="Họ và tên" />
-        <Input required type="tel" placeholder="Số điện thoại" />
+        <Input required placeholder={t.checkout.fullName} />
+        <Input required type="tel" placeholder={t.checkout.phone} />
       </div>
-      <Input required type="email" placeholder="Email" />
-      <Textarea required rows={4} placeholder="Nội dung liên hệ" />
+      <Input required type="email" placeholder={t.checkout.email} />
+      <Textarea required rows={4} placeholder={t.contact.messageContent} />
       <Button type="submit" className="px-8">
-        Gửi liên hệ
+        {t.contact.submit}
       </Button>
     </form>
   );

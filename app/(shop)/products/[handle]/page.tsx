@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAllProducts, getProductByHandle, getRelatedProducts } from "@/lib/data/products";
-import { getProductPhotos, withPhotosList } from "@/lib/utils/productImages";
+import { getProductPhotos, withPhotos, withPhotosList } from "@/lib/utils/productImages";
 import { company } from "@/lib/data/company";
 import { formatPrice } from "@/lib/utils/formatPrice";
 import { Gallery } from "@/components/product/Gallery";
@@ -10,6 +10,7 @@ import { ProductBuyBox } from "@/components/product/ProductBuyBox";
 import { Accordion } from "@/components/ui/Accordion";
 import { ShareButtons } from "@/components/product/ShareButtons";
 import { RelatedProducts } from "@/components/product/RelatedProducts";
+import { getT, getLocale } from "@/lib/i18n/locale";
 
 type Props = {
   params: Promise<{ handle: string }>;
@@ -27,9 +28,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // Chưa có ảnh thật thì không set openGraph.images ở đây — trang sẽ tự dùng ảnh
   // mặc định của (shop)/opengraph-image.tsx (logo thương hiệu) thay vì để trống.
   const photos = getProductPhotos(product.handle);
+  const locale = await getLocale();
   return {
     title: product.title,
-    description: product.descriptionVi,
+    description: (locale === "en" && product.descriptionEn) || product.descriptionVi,
     openGraph: photos[0] ? { images: [{ url: photos[0] }] } : undefined,
     twitter: photos[0] ? { card: "summary_large_image", images: [photos[0]] } : undefined,
   };
@@ -42,9 +44,21 @@ export default async function ProductPage({ params, searchParams }: Props) {
   if (!product) notFound();
 
   const related = withPhotosList(getRelatedProducts(product));
-  const photos = getProductPhotos(product.handle);
+  // Gắn "photos" vào product (không chỉ dùng riêng cho Gallery) — ProductBuyBox cần
+  // nó để lưu đúng ảnh thật vào giỏ hàng khi bấm "Thêm vào giỏ" (xem CartLineThumb).
+  const productWithPhotos = withPhotos(product);
+  const photos = productWithPhotos.photos!;
   const selectedVariant = product.variants.find((v) => v.id === variant) ?? product.variants[0];
-  const canonicalUrl = `https://25oclock.vn/products/${product.handle}`;
+  const canonicalUrl = `https://25oclockhome.com/products/${product.handle}`;
+  const t = await getT();
+  const locale = await getLocale();
+  // Dữ liệu sản phẩm (chất liệu/bảo quản/nơi sản xuất/mô tả model/gạch đầu dòng) có bản
+  // tiếng Anh song song ("...En") trong lib/data/products.ts — rơi về bản tiếng Việt gốc
+  // nếu sản phẩm đó chưa có bản dịch.
+  const materialText = (locale === "en" && product.materialEn) || product.material;
+  const careText = (locale === "en" && product.careEn) || product.care;
+  const madeInText = (locale === "en" && product.madeInEn) || product.madeIn;
+  const detailsList = (locale === "en" && product.detailsEn) || product.details;
 
   const productJsonLd = {
     "@context": "https://schema.org",
@@ -71,7 +85,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
 
       <nav className="mb-4 text-[12px] text-ink-60">
         <Link href="/" className="hover:text-ink">
-          Trang chủ
+          {t.product.breadcrumbHome}
         </Link>{" "}
         /{" "}
         <Link href={`/collections/${product.collections[1] ?? "all"}`} className="hover:text-ink">
@@ -83,29 +97,33 @@ export default async function ProductPage({ params, searchParams }: Props) {
       <div className="grid grid-cols-1 gap-8 md:grid-cols-[60%_40%] md:gap-12">
         <Gallery photos={photos} images={product.images} code={product.code} alt={product.title} />
 
-        <div className="md:sticky md:top-[calc(var(--chrome-h,96px)+24px)] md:max-h-[calc(100svh-var(--chrome-h,96px)-48px)] md:self-start md:overflow-y-auto">
+        {/* z-40: "md:sticky" tự tạo 1 lớp xếp chồng mới bao quanh cả cột này (kể cả
+        SizeGuideDrawer bên trong) — không có z-index rõ ràng ở đây thì lớp đó bị so
+        sánh ở mức 0, thấp hơn icon Instagram nổi (z-30) trôi nổi toàn trang, khiến
+        icon đó đè lên trên drawer dù drawer tự có z-50 (chỉ đúng cục bộ trong lớp này). */}
+        <div className="md:sticky md:top-[calc(var(--chrome-h,96px)+24px)] md:z-40 md:max-h-[calc(100svh-var(--chrome-h,96px)-48px)] md:self-start md:overflow-y-auto">
           <h1 className="text-[20px] font-medium uppercase leading-snug tracking-[0.03em] md:text-[24px]">
             {product.title}
           </h1>
 
-          <ProductBuyBox product={product} initialVariantId={variant} />
+          <ProductBuyBox product={productWithPhotos} initialVariantId={variant} />
 
           <div className="mt-8">
             <Accordion
               defaultOpenIndex={0}
               items={[
                 {
-                  heading: "Chi tiết",
+                  heading: t.product.details,
                   content: (
                     <div className="space-y-3">
                       <ul className="mt-2 space-y-1 text-ink-60">
-                        <li>Chất liệu: {product.material}</li>
-                        <li>Form dáng: {product.fit}</li>
-                        <li>Sản xuất tại: {product.madeIn}</li>
+                        <li>{t.product.material(materialText)}</li>
+                        <li>{t.product.fit(t.product.fitLabel[product.fit] ?? product.fit)}</li>
+                        <li>{t.product.madeIn(madeInText)}</li>
                       </ul>
-                      {product.details?.length ? (
+                      {detailsList?.length ? (
                         <ul className="mt-3 list-disc space-y-1 pl-4 text-ink-60">
-                          {product.details.map((line) => (
+                          {detailsList.map((line) => (
                             <li key={line}>{line}</li>
                           ))}
                         </ul>
@@ -114,20 +132,19 @@ export default async function ProductPage({ params, searchParams }: Props) {
                   ),
                 },
                 {
-                  heading: "Bảo quản",
-                  content: <p>{product.care}</p>,
+                  heading: t.product.care,
+                  content: <p>{careText}</p>,
                 },
                 {
-                  heading: "Vận chuyển & đổi trả",
+                  heading: t.product.shippingReturns,
                   content: (
                     <div className="space-y-2">
                       <p>
-                        Giao nội thành 1–2 ngày, tỉnh thành khác 2–4 ngày. Miễn phí ship cho đơn từ{" "}
-                        {formatPrice({ amount: company.freeShippingThreshold, currencyCode: "VND" })}.
+                        {t.product.shippingBlurb(formatPrice({ amount: company.freeShippingThreshold, currencyCode: "VND" }))}
                       </p>
-                      <p>Đổi trả trong {company.returnWindowDays} ngày nếu còn nguyên tem, chưa qua sử dụng.</p>
+                      <p>{t.product.returnBlurb(company.returnWindowDays)}</p>
                       <Link href="/pages/shipping-returns" className="inline-block underline underline-offset-2">
-                        Xem chính sách đầy đủ
+                        {t.common.viewFullPolicy}
                       </Link>
                     </div>
                   ),

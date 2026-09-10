@@ -9,11 +9,13 @@ import { formatPrice } from "@/lib/utils/formatPrice";
 import { SizeGuideDrawer } from "@/components/product/SizeGuideDrawer";
 import { Button } from "@/components/ui/Button";
 import { IconMinus, IconPlus } from "@/components/ui/icons";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 export function ProductBuyBox({ product, initialVariantId }: { product: Product; initialVariantId?: string }) {
   const router = useRouter();
   const pathname = usePathname();
   const { addToCart } = useCart();
+  const { dict: t, locale } = useLocale();
 
   const defaultVariant =
     product.variants.find((v) => v.id === initialVariantId) ??
@@ -78,9 +80,9 @@ export function ProductBuyBox({ product, initialVariantId }: { product: Product;
       {/* Chọn size — nút vuông (mục 6.4.3) */}
       <div className="mt-6">
         <div className="mb-2 flex items-center justify-between">
-          <span className="nav-link">Size</span>
+          <span className="nav-link">{t.product.size}</span>
           <button type="button" onClick={() => setSizeGuideOpen(true)} className="text-[12px] underline underline-offset-2">
-            Hướng dẫn chọn size
+            {t.product.sizeGuide}
           </button>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -109,7 +111,7 @@ export function ProductBuyBox({ product, initialVariantId }: { product: Product;
                     </span>
                     {/* Chú thích hiện khi rê chuột / chạm vào — báo rõ vì sao size này không bấm được. */}
                     <span className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap bg-ink px-2 py-1 text-[11px] normal-case tracking-normal text-white opacity-0 transition-opacity duration-150 group-hover:opacity-100">
-                      Hết size {v.size}
+                      {t.product.outOfSize(v.size)}
                     </span>
                   </>
                 ) : null}
@@ -124,7 +126,7 @@ export function ProductBuyBox({ product, initialVariantId }: { product: Product;
         <div className="flex items-center border border-line">
           <button
             type="button"
-            aria-label="Giảm số lượng"
+            aria-label={t.product.quantityDecrease}
             onClick={() => setQuantity((q) => Math.max(1, q - 1))}
             className="flex h-12 w-10 items-center justify-center hover:bg-bg-alt"
           >
@@ -133,7 +135,7 @@ export function ProductBuyBox({ product, initialVariantId }: { product: Product;
           <span className="w-8 text-center text-[14px] tabular-nums">{quantity}</span>
           <button
             type="button"
-            aria-label="Tăng số lượng"
+            aria-label={t.product.quantityIncrease}
             onClick={() => setQuantity((q) => Math.min(10, q + 1))}
             className="flex h-12 w-10 items-center justify-center hover:bg-bg-alt"
           >
@@ -146,7 +148,7 @@ export function ProductBuyBox({ product, initialVariantId }: { product: Product;
           disabled={!selectedVariant.available}
           className="flex-1"
         >
-          {selectedVariant.available ? "Thêm vào giỏ" : "Hết hàng"}
+          {selectedVariant.available ? t.common.addToCart : t.common.soldOut}
         </Button>
       </div>
 
@@ -158,14 +160,14 @@ export function ProductBuyBox({ product, initialVariantId }: { product: Product;
         disabled={!selectedVariant.available}
         className="mt-4 md:mt-3"
       >
-        Mua ngay
+        {t.common.buyNow}
       </Button>
 
       <SizeGuideDrawer
         isOpen={sizeGuideOpen}
         onClose={() => setSizeGuideOpen(false)}
         sizeChart={product.sizeChart}
-        modelInfo={product.modelInfo}
+        modelInfo={(locale === "en" && product.modelInfoEn) || product.modelInfo}
       />
 
       <AnimatePresence>
@@ -180,7 +182,7 @@ export function ProductBuyBox({ product, initialVariantId }: { product: Product;
             <div className="min-w-0 flex-1">
               <p className="truncate text-[13px] font-medium uppercase tracking-wide">{product.title}</p>
               <p className="text-[13px] tabular-nums text-ink-60">
-                {formatPrice(product.price)} · Size {selectedVariant.size}
+                {formatPrice(product.price)} · {t.product.size} {selectedVariant.size}
               </p>
             </div>
             <Button
@@ -189,7 +191,7 @@ export function ProductBuyBox({ product, initialVariantId }: { product: Product;
               disabled={!selectedVariant.available}
               className="shrink-0"
             >
-              {selectedVariant.available ? "Thêm vào giỏ" : "Hết hàng"}
+              {selectedVariant.available ? t.common.addToCart : t.common.soldOut}
             </Button>
           </motion.div>
         ) : null}

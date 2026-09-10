@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 const SPACING_VW = 25; // khoảng cách giữa tâm các ảnh — đủ để ảnh bên chỉ hé khoảng nửa
 const DRAG_THRESHOLD = 60; // px — kéo quá mức này thì chuyển ảnh
@@ -17,6 +18,7 @@ const CLICK_MOVE_THRESHOLD = 6; // px — di chuyển ít hơn mức này khi th
  * ảnh mờ): bấm nửa trái/phải màn hình sẽ lùi/tiến 1 ảnh.
  */
 export function CampaignSlideshow({ images, startIndex }: { images: string[]; startIndex: number }) {
+  const { dict: t } = useLocale();
   const [active, setActive] = useState(startIndex);
   const dragStartX = useRef(0);
   const dragging = useRef(false);
@@ -25,6 +27,17 @@ export function CampaignSlideshow({ images, startIndex }: { images: string[]; st
   function go(i: number) {
     setActive(Math.min(Math.max(i, 0), images.length - 1));
   }
+
+  // Bàn phím: mũi tên trái/phải chuyển ảnh (desktop) — dùng active làm dependency
+  // để luôn đọc đúng giá trị mới nhất, không cần ref phụ.
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "ArrowLeft") go(active - 1);
+      else if (e.key === "ArrowRight") go(active + 1);
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [active]);
 
   function onPointerDown(e: React.PointerEvent) {
     dragging.current = true;
@@ -76,7 +89,7 @@ export function CampaignSlideshow({ images, startIndex }: { images: string[]; st
               e.stopPropagation(); // ảnh tự xử lý riêng, không để lọt xuống onBackgroundClick
               if (movedDistance.current <= CLICK_MOVE_THRESHOLD) go(i);
             }}
-            aria-label={isActive ? undefined : `Xem ảnh ${i + 1}`}
+            aria-label={isActive ? undefined : t.lookbook.viewImage(i + 1)}
             tabIndex={dist > 1 ? -1 : 0}
             className="absolute aspect-[3/4] w-[55vw] max-w-[360px] shrink-0 overflow-hidden will-change-transform sm:w-[41vw] md:w-[29vw]"
             style={{ zIndex: 10 - dist }}
@@ -89,7 +102,7 @@ export function CampaignSlideshow({ images, startIndex }: { images: string[]; st
           >
             <Image
               src={src}
-              alt={`Campaign — 25 o'clock ${i + 1}`}
+              alt={`Lookbook — 25 o'clock ${i + 1}`}
               fill
               sizes="(min-width: 768px) 29vw, (min-width: 640px) 41vw, 55vw"
               priority={dist <= 1}

@@ -14,20 +14,19 @@
  * company.orderNotificationEmail (qua Resend) — xem .env.local.example để bật.
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useCart } from "@/lib/store/cart-context";
 import { formatPrice } from "@/lib/utils/formatPrice";
 import { buildVietQrUrl, isBankAccountConfigured } from "@/lib/utils/vietqr";
 import { isValidVietnamesePhone, normalizePhone } from "@/lib/utils/phone";
 import { Button, LinkButton } from "@/components/ui/Button";
 import { Input, Select, Textarea } from "@/components/ui/Input";
-import { Placeholder } from "@/components/ui/Placeholder";
+import { CartLineThumb } from "@/components/cart/CartLineThumb";
+import { IconInstagram } from "@/components/ui/icons";
 import { company } from "@/lib/data/company";
 import { provinces, getDistrictsByProvinceCode, getWardsByDistrictCode } from "@/lib/data/vietnamLocations";
 import type { CartLine, OrderPayload } from "@/lib/types";
-
-// Chỉ còn 1 phương thức — chuyển khoản qua VietQR (đã bỏ COD).
-const PAYMENT_LABEL = "Chuyển khoản ngân hàng (VietQR)";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 type OrderSummary = {
   lines: CartLine[];
@@ -49,9 +48,45 @@ function makeOrderId(): string {
 
 const EMPTY_CUSTOMER = { name: "", phone: "", email: "", address: "", city: "", district: "", ward: "", note: "" };
 
+// Mã tỉnh/thành của Hà Nội trong lib/data/vietnamLocations.ts (dữ liệu 63 tỉnh/thành cũ) — dùng
+// để tính phí ship nội thành Hà Nội riêng, thấp hơn các tỉnh thành khác (mục company.shippingFeeHanoi).
+const HANOI_PROVINCE_CODE = 1;
+
+/**
+ * Khối thông báo "chụp màn hình gửi Instagram" — dùng chung cho cả lúc điền
+ * form (nhắc trước) và sau khi đặt hàng xong (nhắc lại, có mã đơn). Nền đen
+ * đặc + icon để thật nổi bật, không dùng màu đỏ (giữ đúng tông đen-trắng của
+ * shop, tránh gây cảm giác giống lỗi/cảnh báo).
+ */
+function InstagramNotice({ heading, message }: { heading: string; message: React.ReactNode }) {
+  return (
+    <div className="border border-ink bg-ink px-4 py-4 text-white">
+      <div className="flex items-center gap-2">
+        <IconInstagram className="h-5 w-5 shrink-0" />
+        <p className="text-[13px] font-semibold uppercase tracking-wide">{heading}</p>
+      </div>
+      <p className="mt-2 text-[13px] leading-relaxed text-white/80">{message}</p>
+      <a
+        href={company.instagram.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-3 inline-flex items-center gap-1.5 bg-white px-4 py-2 text-[12px] font-medium uppercase tracking-wide text-ink transition-colors hover:bg-white/85"
+      >
+        <IconInstagram className="h-3.5 w-3.5" />
+        {company.instagram.label}
+      </a>
+    </div>
+  );
+}
+
 export default function CheckoutPage() {
   const { lines, subtotalAmount, clearCart } = useCart();
+  const { dict: t } = useLocale();
+  const paymentLabel = t.checkout.paymentLabel;
   const [step, setStep] = useState<Step>({ name: "form" });
+  // Chặn bấm đúp "Đặt hàng" — bấm nhanh 2 lần trước khi React kịp render lại
+  // (đổi sang bước "done", ẩn nút đi) có thể tạo 2 đơn trùng trong Supabase.
+  const submittingRef = useRef(false);
   const [customer, setCustomer] = useState(EMPTY_CUSTOMER);
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [loggedInEmail, setLoggedInEmail] = useState<string | null>(null);
@@ -75,7 +110,12 @@ export default function CheckoutPage() {
       .catch(() => {});
   }, []);
 
-  const shippingFee = subtotalAmount >= company.freeShippingThreshold || subtotalAmount === 0 ? 0 : 30000;
+  const shippingFee =
+    subtotalAmount >= company.freeShippingThreshold || subtotalAmount === 0
+      ? 0
+      : provinceCode === HANOI_PROVINCE_CODE
+        ? company.shippingFeeHanoi
+        : company.shippingFeeOtherProvinces;
   const total = subtotalAmount + shippingFee;
 
   function updateField(field: keyof typeof customer, value: string) {
@@ -122,22 +162,24 @@ export default function CheckoutPage() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (submittingRef.current) return; // đang xử lý lượt bấm trước — bỏ qua các lần bấm thêm
     if (!isValidVietnamesePhone(customer.phone)) {
-      setPhoneError("Số điện thoại không đúng định dạng di động Việt Nam (VD: 0912 345 678).");
+      setPhoneError(t.checkout.phoneInvalid);
       return;
     }
     setPhoneError(null);
     if (loggedInEmail && customer.email.trim().toLowerCase() !== loggedInEmail.toLowerCase()) {
-      setEmailError(`Email phải trùng với email tài khoản đang đăng nhập (${loggedInEmail}) để đơn hiện đúng trong "Tài khoản".`);
+      setEmailError(t.checkout.emailMismatch(loggedInEmail));
       return;
     }
     setEmailError(null);
+    submittingRef.current = true;
     const orderId = makeOrderId();
-    notifyOrder(orderId, PAYMENT_LABEL);
+    notifyOrder(orderId, paymentLabel);
     // Chụp lại giỏ hàng trước khi clearCart() xoá sạch — bước xác nhận cần hiện
     // lại đúng những gì vừa đặt. Đơn được ghi nhận ngay — không còn nút "Tôi đã
     // chuyển khoản": khách chụp mã đơn gửi qua Instagram rồi thanh toán/xác nhận ở đó.
-    setStep({ name: "done", orderId, lines, subtotal: subtotalAmount, shippingFee, total, paymentLabel: PAYMENT_LABEL });
+    setStep({ name: "done", orderId, lines, subtotal: subtotalAmount, shippingFee, total, paymentLabel });
     clearCart();
   }
 
@@ -145,15 +187,15 @@ export default function CheckoutPage() {
     const qrUrl = buildVietQrUrl(step.total, step.orderId);
     return (
       <div className="container-25 flex flex-col items-center gap-5 py-16 text-center">
-        <h1 className="text-[22px] font-medium uppercase tracking-[0.06em]">Đặt hàng thành công</h1>
+        <h1 className="text-[22px] font-medium uppercase tracking-[0.06em]">{t.checkout.orderSuccess}</h1>
         <p className="text-[14px] text-ink-60">
-          Mã đơn hàng <strong className="text-ink">#{step.orderId}</strong>
+          {t.checkout.orderCode} <strong className="text-ink">#{step.orderId}</strong>
         </p>
 
         {/* eslint-disable-next-line @next/next/no-img-element -- ảnh QR động từ VietQR.io, không cần tối ưu qua next/image */}
         <img
           src={qrUrl}
-          alt={`Mã VietQR chuyển khoản ${formatPrice({ amount: step.total, currencyCode: "VND" })}`}
+          alt={t.checkout.qrAlt(formatPrice({ amount: step.total, currencyCode: "VND" }))}
           width={300}
           height={430}
           className="border border-line"
@@ -161,10 +203,10 @@ export default function CheckoutPage() {
 
         <div className="text-[14px]">
           <p>
-            Số tiền: <strong>{formatPrice({ amount: step.total, currencyCode: "VND" })}</strong>
+            {t.checkout.amount}: <strong>{formatPrice({ amount: step.total, currencyCode: "VND" })}</strong>
           </p>
           <p>
-            Nội dung chuyển khoản: <strong>{step.orderId}</strong>
+            {t.checkout.transferContent}: <strong>{step.orderId}</strong>
           </p>
           <p className="mt-2 text-ink-60">
             {company.bankAccount.accountName} — {company.bankAccount.bankId.toUpperCase()} —{" "}
@@ -173,27 +215,19 @@ export default function CheckoutPage() {
         </div>
 
         {!isBankAccountConfigured() ? (
-          <p className="max-w-sm text-[12px] text-sale">
-            Đây là số tài khoản mẫu, chưa phải tài khoản thật — sửa trong{" "}
-            <code className="text-[11px]">lib/data/company.ts</code> (bankAccount) để hiện đúng tài khoản nhận tiền
-            của bạn.
-          </p>
+          <p className="max-w-sm text-[12px] text-sale">{t.checkout.sampleAccountWarning}</p>
         ) : null}
 
-        <div className="w-full max-w-sm border border-ink px-4 py-3 text-left text-[14px]">
-          <p className="font-medium">Bước tiếp theo</p>
-          <p className="mt-1.5 text-[13px] leading-snug text-ink-60">
-            Chụp lại màn hình trang này (có mã đơn <strong className="text-ink">#{step.orderId}</strong>) và gửi qua
-            Instagram cho shop để thanh toán/xác nhận đơn.
-          </p>
-          <a
-            href={company.instagram.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-3 inline-block text-[13px] text-ink underline underline-offset-2"
-          >
-            {company.instagram.label}
-          </a>
+        <div className="w-full max-w-sm">
+          <InstagramNotice
+            heading={t.checkout.igDoneHeading}
+            message={
+              <>
+                {t.checkout.igDoneMessage} <strong className="text-white">#{step.orderId}</strong>
+                {t.checkout.igDoneMessageEnd}
+              </>
+            }
+          />
         </div>
 
         <div className="mt-4 w-full max-w-md border border-line text-left">
@@ -201,12 +235,12 @@ export default function CheckoutPage() {
             {step.lines.map((line) => (
               <div key={line.lineId} className="flex gap-3 p-4">
                 <div className="w-14 shrink-0">
-                  <Placeholder tone={line.image.tone} ratio="3 / 4" />
+                  <CartLineThumb photo={line.photo} tone={line.image.tone} alt={line.title} />
                 </div>
                 <div className="flex flex-1 flex-col justify-center">
                   <p className="text-[13px] font-medium uppercase tracking-wide">{line.title}</p>
                   <p className="mt-0.5 text-[12px] text-ink-60">
-                    Size {line.size} · SL {line.quantity}
+                    {t.product.size} {line.size} · {t.cart.quantityAbbr} {line.quantity}
                   </p>
                 </div>
                 <p className="self-center text-[13px] tabular-nums">
@@ -217,28 +251,28 @@ export default function CheckoutPage() {
           </div>
           <div className="space-y-1.5 border-t border-line p-4 text-[13px]">
             <div className="flex justify-between text-ink-60">
-              <span>Tạm tính</span>
+              <span>{t.cart.subtotal}</span>
               <span className="tabular-nums">{formatPrice({ amount: step.subtotal, currencyCode: "VND" })}</span>
             </div>
             <div className="flex justify-between text-ink-60">
-              <span>Vận chuyển</span>
+              <span>{t.checkout.shippingFee}</span>
               <span className="tabular-nums">
-                {step.shippingFee === 0 ? "Miễn phí" : formatPrice({ amount: step.shippingFee, currencyCode: "VND" })}
+                {step.shippingFee === 0 ? t.checkout.free : formatPrice({ amount: step.shippingFee, currencyCode: "VND" })}
               </span>
             </div>
             <div className="flex justify-between pt-1 text-[14px] font-medium">
-              <span>Tổng cộng</span>
+              <span>{t.checkout.total}</span>
               <span className="tabular-nums">{formatPrice({ amount: step.total, currencyCode: "VND" })}</span>
             </div>
             <div className="flex justify-between pt-1 text-ink-60">
-              <span>Thanh toán</span>
+              <span>{t.checkout.payment}</span>
               <span>{step.paymentLabel}</span>
             </div>
           </div>
         </div>
 
         <LinkButton href="/collections/all" className="mt-4">
-          Tiếp tục mua sắm
+          {t.common.continueShopping}
         </LinkButton>
       </div>
     );
@@ -247,8 +281,8 @@ export default function CheckoutPage() {
   if (lines.length === 0) {
     return (
       <div className="container-25 flex flex-col items-center gap-4 py-24 text-center">
-        <p className="text-[15px] text-ink-60">Giỏ hàng đang trống, không có gì để thanh toán.</p>
-        <LinkButton href="/collections/all">Quay lại mua sắm</LinkButton>
+        <p className="text-[15px] text-ink-60">{t.checkout.emptyCart}</p>
+        <LinkButton href="/collections/all">{t.checkout.backToShop}</LinkButton>
       </div>
     );
   }
@@ -256,17 +290,17 @@ export default function CheckoutPage() {
   return (
     <div className="container-25 py-8 md:py-12">
       <h1 className="mb-8 text-center text-[22px] font-medium uppercase tracking-[0.06em] md:text-[28px]">
-        Thanh toán
+        {t.checkout.title}
       </h1>
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-10 md:grid-cols-[1fr_400px]">
         <div className="space-y-8">
           <section>
-            <h2 className="nav-link mb-4">Thông tin giao hàng</h2>
+            <h2 className="nav-link mb-4">{t.checkout.shippingInfo}</h2>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Input
                 required
-                placeholder="Họ và tên"
+                placeholder={t.checkout.fullName}
                 value={customer.name}
                 onChange={(e) => updateField("name", e.target.value)}
               />
@@ -274,7 +308,7 @@ export default function CheckoutPage() {
                 <Input
                   required
                   type="tel"
-                  placeholder="Số điện thoại"
+                  placeholder={t.checkout.phone}
                   value={customer.phone}
                   onChange={(e) => {
                     updateField("phone", e.target.value);
@@ -289,7 +323,7 @@ export default function CheckoutPage() {
                 <Input
                   required
                   type="email"
-                  placeholder="Email"
+                  placeholder={t.checkout.email}
                   value={customer.email}
                   onChange={(e) => {
                     updateField("email", e.target.value);
@@ -309,16 +343,16 @@ export default function CheckoutPage() {
                       }}
                       className="underline underline-offset-2"
                     >
-                      Dùng email tài khoản
+                      {t.checkout.useAccountEmail}
                     </button>
                   </p>
                 ) : loggedInEmail ? (
-                  <p className="mt-1 text-[12px] text-ink-60">Đang dùng email tài khoản: {loggedInEmail}</p>
+                  <p className="mt-1 text-[12px] text-ink-60">{t.checkout.usingAccountEmail(loggedInEmail)}</p>
                 ) : null}
               </div>
               <Input
                 required
-                placeholder="Địa chỉ"
+                placeholder={t.checkout.address}
                 className="sm:col-span-2"
                 value={customer.address}
                 onChange={(e) => updateField("address", e.target.value)}
@@ -327,10 +361,10 @@ export default function CheckoutPage() {
                 required
                 value={provinceCode ?? ""}
                 onChange={(e) => handleProvinceChange(e.target.value)}
-                aria-label="Tỉnh / Thành phố"
+                aria-label={t.checkout.province}
               >
                 <option value="" disabled>
-                  Tỉnh / Thành phố
+                  {t.checkout.province}
                 </option>
                 {provinces.map((p) => (
                   <option key={p.code} value={p.code}>
@@ -343,10 +377,10 @@ export default function CheckoutPage() {
                 value={districtCode ?? ""}
                 onChange={(e) => handleDistrictChange(e.target.value)}
                 disabled={!provinceCode}
-                aria-label="Quận / Huyện"
+                aria-label={t.checkout.district}
               >
                 <option value="" disabled>
-                  {provinceCode ? "Quận / Huyện" : "Chọn tỉnh/thành trước"}
+                  {provinceCode ? t.checkout.district : t.checkout.chooseProvinceFirst}
                 </option>
                 {districts.map((d) => (
                   <option key={d.code} value={d.code}>
@@ -359,11 +393,11 @@ export default function CheckoutPage() {
                 value={wards.find((w) => w.name === customer.ward)?.code ?? ""}
                 onChange={(e) => handleWardChange(e.target.value)}
                 disabled={!districtCode}
-                aria-label="Phường / Xã"
+                aria-label={t.checkout.ward}
                 className="sm:col-span-2"
               >
                 <option value="" disabled>
-                  {districtCode ? "Phường / Xã" : "Chọn quận/huyện trước"}
+                  {districtCode ? t.checkout.ward : t.checkout.chooseDistrictFirst}
                 </option>
                 {wards.map((w) => (
                   <option key={w.code} value={w.code}>
@@ -374,7 +408,7 @@ export default function CheckoutPage() {
             </div>
             <Textarea
               rows={2}
-              placeholder="Ghi chú đơn hàng (tuỳ chọn)"
+              placeholder={t.checkout.note}
               className="mt-4"
               value={customer.note}
               onChange={(e) => updateField("note", e.target.value)}
@@ -382,37 +416,28 @@ export default function CheckoutPage() {
           </section>
 
           <section>
-            <h2 className="nav-link mb-4">Phương thức thanh toán</h2>
+            <h2 className="nav-link mb-4">{t.checkout.paymentMethod}</h2>
             <div className="border border-ink px-4 py-3 text-[14px]">
-              <p className="font-medium">{PAYMENT_LABEL}</p>
-              <p className="mt-1.5 text-[13px] leading-snug text-ink-60">
-                Để hoàn tất đặt hàng, quý khách vui lòng chụp ảnh xác nhận chuyển khoản và gửi qua Instagram để
-                shop xác nhận đơn.{" "}
-                <a
-                  href={company.instagram.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-ink underline underline-offset-2"
-                >
-                  {company.instagram.label}
-                </a>
-              </p>
+              <p className="font-medium">{paymentLabel}</p>
+            </div>
+            <div className="mt-3">
+              <InstagramNotice heading={t.checkout.igNoticeHeading} message={t.checkout.igNoticeMessage} />
             </div>
           </section>
         </div>
 
         <div className="h-fit border border-line p-6">
-          <h2 className="nav-link mb-4">Đơn hàng ({lines.length})</h2>
+          <h2 className="nav-link mb-4">{t.checkout.orderTitle(lines.length)}</h2>
           <div className="max-h-64 space-y-3 overflow-y-auto pr-1">
             {lines.map((line) => (
               <div key={line.lineId} className="flex items-center gap-3">
                 <div className="w-14 shrink-0">
-                  <Placeholder tone={line.image.tone} ratio="3 / 4" />
+                  <CartLineThumb photo={line.photo} tone={line.image.tone} alt={line.title} />
                 </div>
                 <div className="flex-1 text-[13px]">
                   <p className="uppercase">{line.title}</p>
                   <p className="text-ink-60">
-                    Size {line.size} × {line.quantity}
+                    {t.product.size} {line.size} × {line.quantity}
                   </p>
                 </div>
                 <span className="text-[13px] tabular-nums">
@@ -424,21 +449,21 @@ export default function CheckoutPage() {
 
           <div className="mt-4 space-y-2 border-t border-line pt-4 text-[14px]">
             <div className="flex justify-between">
-              <span>Tạm tính</span>
+              <span>{t.cart.subtotal}</span>
               <span className="tabular-nums">{formatPrice({ amount: subtotalAmount, currencyCode: "VND" })}</span>
             </div>
             <div className="flex justify-between">
-              <span>Vận chuyển</span>
-              <span className="tabular-nums">{shippingFee === 0 ? "Miễn phí" : formatPrice({ amount: shippingFee, currencyCode: "VND" })}</span>
+              <span>{t.checkout.shippingFee}</span>
+              <span className="tabular-nums">{shippingFee === 0 ? t.checkout.free : formatPrice({ amount: shippingFee, currencyCode: "VND" })}</span>
             </div>
             <div className="flex justify-between border-t border-line pt-2 text-[16px] font-medium">
-              <span>Tổng cộng</span>
+              <span>{t.checkout.total}</span>
               <span className="tabular-nums">{formatPrice({ amount: total, currencyCode: "VND" })}</span>
             </div>
           </div>
 
           <Button type="submit" fullWidth className="mt-6">
-            Đặt hàng
+            {t.checkout.placeOrder}
           </Button>
         </div>
       </form>

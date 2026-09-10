@@ -3,12 +3,14 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 const SCROLL_SPEED = 0.6; // px/khung hình (~36px/s ở 60fps) — chạy liên tục kiểu marquee
 const DRAG_CLICK_THRESHOLD = 6; // px — di chuyển ít hơn mức này khi thả thì tính là bấm, không phải kéo
 
 export function CampaignCarousel({ images, basePath = "/campaign" }: { images: string[]; basePath?: string }) {
   const router = useRouter();
+  const { dict: t } = useLocale();
   const trackRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
   const interacting = useRef(false); // true trong lúc đang thực sự bấm/kéo — tick() sẽ bỏ qua bước tự chạy
@@ -96,7 +98,7 @@ export function CampaignCarousel({ images, basePath = "/campaign" }: { images: s
   return (
     <div
       ref={trackRef}
-      className="no-scrollbar flex cursor-grab gap-2 overflow-x-auto select-none active:cursor-grabbing"
+      className="no-scrollbar flex cursor-grab gap-6 overflow-x-auto select-none active:cursor-grabbing md:gap-2"
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerLeave={onPointerUp}
@@ -111,7 +113,7 @@ export function CampaignCarousel({ images, basePath = "/campaign" }: { images: s
         >
           <Image
             src={src}
-            alt={`Campaign khách hàng ${(i % images.length) + 1}`}
+            alt={t.lookbook.customerPhotoAlt((i % images.length) + 1)}
             fill
             sizes="260px"
             draggable={false}

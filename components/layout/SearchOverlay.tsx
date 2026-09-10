@@ -10,6 +10,7 @@ import { Placeholder } from "@/components/ui/Placeholder";
 import { normalize, searchProducts } from "@/lib/data/products";
 import { navCollections } from "@/lib/data/collections";
 import { formatPrice } from "@/lib/utils/formatPrice";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 export function SearchOverlay({
   isOpen,
@@ -22,6 +23,7 @@ export function SearchOverlay({
   productPhotos?: Record<string, string[]>;
 }) {
   const router = useRouter();
+  const { dict: t } = useLocale();
   const [query, setQuery] = useState("");
 
   useEffect(() => {
@@ -62,7 +64,7 @@ export function SearchOverlay({
           className="fixed inset-0 z-50 overflow-y-auto bg-bg text-ink"
         >
           <div className="mx-auto max-w-3xl px-6 pb-16 pt-20 md:pt-28">
-            <button aria-label="Đóng tìm kiếm" onClick={onClose} className="absolute right-4 top-4 p-2 md:right-8 md:top-6">
+            <button aria-label={t.header.closeSearch} onClick={onClose} className="absolute right-4 top-4 p-2 md:right-8 md:top-6">
               <IconClose className="h-6 w-6" />
             </button>
 
@@ -79,7 +81,7 @@ export function SearchOverlay({
                 autoFocus
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Tìm sản phẩm, ví dụ: quần ống rộng"
+                placeholder={t.search.placeholder}
                 className="w-full bg-transparent text-[20px] outline-none placeholder:text-ink-60 md:text-[28px]"
               />
             </form>
@@ -88,7 +90,7 @@ export function SearchOverlay({
               <div className="mt-8 space-y-8">
                 {productMatches.length > 0 ? (
                   <div>
-                    <p className="nav-link mb-4 text-ink-60">Sản phẩm</p>
+                    <p className="nav-link mb-4 text-ink-60">{t.search.products}</p>
                     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
                       {productMatches.map((p) => {
                         const photo = productPhotos[p.handle]?.[0];
@@ -118,7 +120,7 @@ export function SearchOverlay({
 
                 {collectionMatches.length > 0 ? (
                   <div>
-                    <p className="nav-link mb-3 text-ink-60">Danh mục</p>
+                    <p className="nav-link mb-3 text-ink-60">{t.search.categories}</p>
                     <div className="flex flex-wrap gap-2">
                       {collectionMatches.map((c) => (
                         <Link
@@ -135,10 +137,10 @@ export function SearchOverlay({
                 ) : null}
 
                 {productMatches.length === 0 && collectionMatches.length === 0 ? (
-                  <p className="text-[14px] text-ink-60">Không tìm thấy kết quả phù hợp với “{query}”.</p>
+                  <p className="text-[14px] text-ink-60">{t.search.noResults(query)}</p>
                 ) : (
                   <button onClick={submit} className="text-[13px] underline underline-offset-4">
-                    Xem tất cả kết quả cho “{query}”
+                    {t.search.viewAllResults(query)}
                   </button>
                 )}
               </div>

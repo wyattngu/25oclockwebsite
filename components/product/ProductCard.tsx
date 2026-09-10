@@ -7,11 +7,13 @@ import type { Product } from "@/lib/types";
 import { Placeholder } from "@/components/ui/Placeholder";
 import { formatPrice } from "@/lib/utils/formatPrice";
 import { useCart } from "@/lib/store/cart-context";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 const GRID_SIZES = "(max-width: 767px) 50vw, (max-width: 1279px) 33vw, 25vw";
 
 export function ProductCard({ product }: { product: Product }) {
   const { addToCart } = useCart();
+  const { dict: t } = useLocale();
   const [pickerOpen, setPickerOpen] = useState(false);
   const [primaryImage, secondaryImage] = product.images;
   const photos = product.photos ?? [];
@@ -64,11 +66,11 @@ export function ProductCard({ product }: { product: Product }) {
 
           {product.soldOut ? (
             <span className="absolute left-3 top-3 z-10 text-[10px] font-medium uppercase tracking-widest text-white/80">
-              Sold out
+              {t.common.soldOut}
             </span>
           ) : product.lastSizes ? (
             <span className="absolute left-3 top-3 z-10 text-[10px] font-medium uppercase tracking-widest text-white/80">
-              Last sizes
+              {t.common.lastSizes}
             </span>
           ) : null}
 
@@ -104,7 +106,7 @@ export function ProductCard({ product }: { product: Product }) {
                   }}
                   className="w-full bg-ink py-3 text-[11px] font-medium uppercase tracking-[0.1em] text-white hover:bg-ink-60"
                 >
-                  Thêm vào giỏ
+                  {t.common.addToCart}
                 </button>
               )}
             </div>

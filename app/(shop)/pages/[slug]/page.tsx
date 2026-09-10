@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getStaticPage, staticPages } from "@/lib/data/pages";
 import { company } from "@/lib/data/company";
 import { ContactForm } from "@/components/forms/ContactForm";
+import { getT, getLocale } from "@/lib/i18n/locale";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -12,31 +13,37 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  if (slug === "contact") return { title: "Liên hệ" };
-  const page = getStaticPage(slug);
+  const locale = await getLocale();
+  if (slug === "contact") {
+    const t = await getT();
+    return { title: t.nav.contact };
+  }
+  const page = getStaticPage(slug, locale);
   if (!page) return {};
   return { title: page.title, description: page.intro };
 }
 
 export default async function StaticPageRoute({ params }: Props) {
   const { slug } = await params;
+  const t = await getT();
+  const locale = await getLocale();
 
   if (slug === "contact") {
     return (
       <div className="container-25 py-8 md:py-12">
         <h1 className="mb-10 text-center text-[22px] font-medium uppercase tracking-[0.06em] md:text-[28px]">
-          Liên hệ
+          {t.nav.contact}
         </h1>
         <div className="grid grid-cols-1 gap-12 md:grid-cols-2">
           <div>
-            <h2 className="nav-link mb-4">Thông tin</h2>
+            <h2 className="nav-link mb-4">{t.account.infoHeading}</h2>
             <dl className="space-y-3 text-[14px]">
               <div>
                 <dt className="text-ink-60">Email</dt>
                 <dd>{company.email}</dd>
               </div>
               <div>
-                <dt className="text-ink-60">Mạng xã hội</dt>
+                <dt className="text-ink-60">{t.contact.socialMedia}</dt>
                 <dd className="space-x-3">
                   <a href={company.instagram.url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">
                     Instagram
@@ -47,7 +54,7 @@ export default async function StaticPageRoute({ params }: Props) {
           </div>
 
           <div>
-            <h2 className="nav-link mb-4">Gửi tin nhắn</h2>
+            <h2 className="nav-link mb-4">{t.contact.sendMessage}</h2>
             <ContactForm />
           </div>
         </div>
@@ -55,7 +62,7 @@ export default async function StaticPageRoute({ params }: Props) {
     );
   }
 
-  const page = getStaticPage(slug);
+  const page = getStaticPage(slug, locale);
   if (!page) notFound();
 
   return (

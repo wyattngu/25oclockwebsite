@@ -12,6 +12,7 @@ export type StaticPage = {
 // mốc miễn phí ship — đổi ở lib/data/company.ts là tự cập nhật khắp nơi, không
 // còn cảnh sửa 1 chỗ mà chỗ khác vẫn ghi số cũ.
 const freeShippingLine = `Miễn phí vận chuyển cho đơn hàng từ ${formatPrice({ amount: company.freeShippingThreshold, currencyCode: "VND" })}.`;
+const freeShippingLineEn = `Free shipping on orders over ${formatPrice({ amount: company.freeShippingThreshold, currencyCode: "VND" })}.`;
 
 export const staticPages: StaticPage[] = [
   {
@@ -85,6 +86,76 @@ sections: [
   },
 ];
 
-export function getStaticPage(slug: string): StaticPage | undefined {
-  return staticPages.find((p) => p.slug === slug);
+// Bản tiếng Anh song song — cùng "slug", cùng thứ tự section, dùng khi khách chọn
+// English (xem app/(shop)/pages/[slug]/page.tsx). Không tự sinh máy — dịch tay để
+// giữ đúng giọng văn thương hiệu.
+export const staticPagesEn: StaticPage[] = [
+  {
+    slug: "about",
+    title: "About 25 O'CLOCK",
+    intro: "25 o'clock is the hour that doesn't exist on a clock — the time you keep just for yourself.",
+    sections: [
+      {
+        heading: "Our Story",
+        paragraphs: [
+          "25 o'clock started in 2025 in Hanoi, from someone who loved clothes and wanted to share that through product rather than words.",
+          "Denim is the material 25 o'clock chose as its core and its signature. Every drop is made in a limited quantity so we can control quality as closely as possible before it reaches you.",
+        ],
+      },
+    ],
+  },
+  {
+    slug: "size-guide",
+    title: "Size Guide",
+    intro:
+      "The measurements below are average figures per product type. Each product page has its own measurement chart, accurate to that item's specific fit.",
+    sections: [
+      {
+        heading: "How to measure",
+        paragraphs: ["Use a measuring tape, on your body or on a piece you already own that fits you well."],
+        list: [
+          "Chest: measure around the fullest part of your chest, tape parallel to the ground.",
+          "Waist: measure around your natural waistline.",
+          "Hip: measure around the fullest part of your hips.",
+          "Garment/inseam length: measure from the highest point of the shoulder/waistband down to your desired endpoint.",
+        ],
+      },
+      {
+        heading: "If you're between two sizes",
+        paragraphs: [
+          "For Regular or Slim fit tops: size up if you prefer a roomier fit.",
+          "For Oversized fit tops: the piece is already cut roomy, so you can usually stick with your regular chest measurement.",
+          "For denim: the size number is the waist measurement in inches (e.g. size 30 = ~76cm waist).",
+        ],
+      },
+    ],
+  },
+  {
+    slug: "shipping-returns",
+    title: "Shipping & Returns",
+    sections: [
+      {
+        heading: "Domestic shipping",
+        paragraphs: ["Orders are processed within 24 business hours of payment confirmation."],
+        list: ["Inner Hanoi: 1–2 business days.", "Other provinces: 2–4 business days.", freeShippingLineEn],
+      },
+      {
+        heading: "International shipping",
+        paragraphs: ["For international orders, please reach out via 25 O'CLOCK's Instagram for detailed support."],
+      },
+      {
+        heading: "Returns & exchanges",
+        paragraphs: [`We accept size exchanges or returns within ${company.returnWindowDays} days of delivery.`],
+        list: [
+          "Item must have tags attached, unused and unwashed.",
+          "Return shipping cost is covered by the customer, except in cases of a manufacturing defect.",
+        ],
+      },
+    ],
+  },
+];
+
+export function getStaticPage(slug: string, locale: "vi" | "en" = "vi"): StaticPage | undefined {
+  const source = locale === "en" ? staticPagesEn : staticPages;
+  return source.find((p) => p.slug === slug);
 }

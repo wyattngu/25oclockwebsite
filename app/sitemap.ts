@@ -3,7 +3,7 @@ import { getAllProducts } from "@/lib/data/products";
 import { collections } from "@/lib/data/collections";
 import { staticPages } from "@/lib/data/pages";
 
-const BASE_URL = "https://25oclock.vn";
+const BASE_URL = "https://25oclockhome.com";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const staticRoutes: MetadataRoute.Sitemap = ["", "/campaign", "/pages/contact"].map((path) => ({

@@ -7,6 +7,7 @@ import { motion, useAnimation } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { IconBag, IconMenu, IconSearch, IconUser } from "@/components/ui/icons";
 import { useCart } from "@/lib/store/cart-context";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 import { AnnouncementBar } from "@/components/layout/AnnouncementBar";
 import { NavOverlay } from "@/components/layout/NavOverlay";
 import { SearchOverlay } from "@/components/layout/SearchOverlay";
@@ -29,6 +30,7 @@ export function Header({
   const [navOpen, setNavOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const { itemCount, openCart } = useCart();
+  const { dict: t } = useLocale();
   const bagControls = useAnimation();
   const prevItemCount = useRef(itemCount);
 
@@ -82,7 +84,7 @@ export function Header({
             transparent ? "bg-transparent text-white" : "bg-ink text-white"
           }`}
         >
-          <button aria-label="Mở menu" onClick={() => setNavOpen(true)} className="justify-self-start p-1.5">
+          <button aria-label={t.header.openMenu} onClick={() => setNavOpen(true)} className="justify-self-start p-1.5">
             <IconMenu className="h-5 w-5" />
           </button>
 
@@ -90,20 +92,21 @@ export function Header({
             {transparent ? (
               <span aria-hidden />
             ) : (
-              <Link href="/" aria-label="25 O'Clock — về trang chủ">
+              <Link href="/" aria-label={t.header.homeLink}>
                 <Image src="/images/logo/logo-white.png" alt="25 O'Clock" width={362} height={70} className="h-4 w-auto md:h-5" priority />
               </Link>
             )}
           </div>
 
           <div className="flex items-center justify-self-end gap-5 md:gap-4">
-            <button aria-label="Tìm kiếm" onClick={() => setSearchOpen(true)} className="p-1.5">
+            {/* Mobile: bỏ khỏi hàng icon, chuyển vào trong menu (NavOverlay) cho gọn — chỉ còn ở đây trên desktop. */}
+            <button aria-label={t.header.search} onClick={() => setSearchOpen(true)} className="hidden p-1.5 md:block">
               <IconSearch className="h-5 w-5" />
             </button>
-            <Link href={isLoggedIn ? "/account" : "/account/login"} aria-label={isLoggedIn ? "Tài khoản" : "Đăng nhập"} className="p-1.5">
+            <Link href={isLoggedIn ? "/account" : "/account/login"} aria-label={isLoggedIn ? t.header.account : t.header.login} className="p-1.5">
               <IconUser className="h-5 w-5" />
             </Link>
-            <button aria-label="Giỏ hàng" onClick={openCart} className="flex items-center gap-1 p-1.5">
+            <button aria-label={t.header.cart} onClick={openCart} className="flex items-center gap-1 p-1.5">
               <motion.span animate={bagControls} className="inline-flex">
                 <IconBag className="h-5 w-5" />
               </motion.span>
@@ -118,6 +121,10 @@ export function Header({
         onClose={() => setNavOpen(false)}
         isLoggedIn={isLoggedIn}
         collectionCovers={collectionCovers}
+        onOpenSearch={() => {
+          setNavOpen(false);
+          setSearchOpen(true);
+        }}
       />
       <SearchOverlay isOpen={searchOpen} onClose={() => setSearchOpen(false)} productPhotos={productPhotos} />
     </>

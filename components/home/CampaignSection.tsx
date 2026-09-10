@@ -30,15 +30,15 @@ function CampaignBlock({ title, images, basePath }: Props) {
 
 export function CampaignSection() {
   const images = getCampaignImages();
-  return <CampaignBlock title="Campaign 0.1" images={images} basePath="/campaign" />;
+  return <CampaignBlock title="Lookbook 0.1" images={images} basePath="/campaign" />;
 }
 
 export function Campaign2Section() {
   const images = getCampaign2Images();
-  return <CampaignBlock title="Campaign 0.2" images={images} basePath="/campaign2" />;
+  return <CampaignBlock title="Lookbook 0.2" images={images} basePath="/campaign2" />;
 }
 
 export function Campaign3Section() {
   const images = getCampaign3Images();
-  return <CampaignBlock title="Campaign 0.3" images={images} basePath="/campaign3" />;
+  return <CampaignBlock title="Lookbook 0.3" images={images} basePath="/campaign3" />;
 }
