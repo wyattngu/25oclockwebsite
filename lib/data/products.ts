@@ -149,7 +149,7 @@ const RAW: RawProduct[] = [
     tones: ["ink", "charcoal", "ink", "stone"],
     labels: ["FRONT", "ON MODEL", "BACK", "DETAIL"],
     sizes: ["1", "2", "3"],
-    unavailableSizes: ["2"], // ví dụ: ["1"] nếu hết size 1
+    unavailableSizes: [], // ví dụ: ["1"] nếu hết size 1
     sizeChart: ECLIPSE_SIZE_CHART,
     material: "Vải raw denim đen, bề mặt mộc, đứng form",
     materialEn: "Black raw denim, unwashed finish, stiff hand-feel",
