@@ -30,10 +30,17 @@ export default async function Image() {
   // Ảnh nền OG là khung ngang (1200×630) nên ưu tiên bản desktop (cũng ngang) — bản
   // mobile (dọc) chỉ dùng khi chưa có bản desktop.
   const heroPath = (desktop ?? mobile)?.split("?")[0] ?? null; // bỏ "?v=..." (chỉ để phá cache trình duyệt, không phải đường dẫn file thật)
+  // logo-black — đúng bản HeroLogo dùng thật trên trang chủ cho ảnh hero này (variant="black",
+  // xem components/home/Hero.tsx) vì nền ảnh sáng màu, chữ đen mới đọc rõ khi không còn khung nền phía sau.
   const [heroSrc, logoSrc] = await Promise.all([
     heroPath ? toDataUri(heroPath) : Promise.resolve(null),
-    toDataUri("/images/logo/logo-white.png"),
+    toDataUri("/images/logo/logo-black.png"),
   ]);
+
+  // Cùng tỉ lệ logo/khung như trên web: HeroLogo rộng "38vw" ở desktop (mục 6.1) — tức
+  // ~38% bề ngang khung hero. Logo gốc 3000×580px (≈5.17:1).
+  const logoWidth = Math.round(size.width * 0.38);
+  const logoHeight = Math.round(logoWidth / (3000 / 580));
 
   return new ImageResponse(
     (
@@ -49,26 +56,17 @@ export default async function Image() {
         }}
       >
         {heroSrc ? (
-          // objectFit "contain" — hiện TRỌN VẸN ảnh hero, không cắt xén, phần thừa
-          // (nếu tỉ lệ khung ảnh khác 1200×630) tự lấp bằng màu nền đen thương hiệu.
-          <img src={heroSrc} width={size.width} height={size.height} style={{ objectFit: "contain" }} />
+          // objectFit "cover" — ảnh phủ kín toàn bộ khung 1200×630, không còn viền đen
+          // 2 bên (khác thumbnail cũ dùng "contain").
+          <img src={heroSrc} width={size.width} height={size.height} style={{ objectFit: "cover" }} />
         ) : (
           <div style={{ fontSize: 96, fontWeight: 700, letterSpacing: 4, color: "#ffffff" }}>25 O&apos;CLOCK</div>
         )}
 
         {logoSrc && heroSrc ? (
-          <div
-            style={{
-              position: "absolute",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: "rgba(10,10,9,0.82)",
-              padding: "28px 56px",
-            }}
-          >
+          <div style={{ position: "absolute", display: "flex", alignItems: "center", justifyContent: "center" }}>
             {/* eslint-disable-next-line @next/next/no-img-element -- ImageResponse (next/og) cần thẻ <img> thường, không dùng next/image được */}
-            <img src={logoSrc} height={56} style={{ objectFit: "contain" }} />
+            <img src={logoSrc} width={logoWidth} height={logoHeight} style={{ objectFit: "contain" }} />
           </div>
         ) : null}
       </div>
