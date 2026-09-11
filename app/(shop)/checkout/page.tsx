@@ -21,6 +21,7 @@ import { buildVietQrUrl, isBankAccountConfigured } from "@/lib/utils/vietqr";
 import { isValidVietnamesePhone, normalizePhone } from "@/lib/utils/phone";
 import { Button, LinkButton } from "@/components/ui/Button";
 import { Input, Select, Textarea } from "@/components/ui/Input";
+import { BackButton } from "@/components/ui/BackButton";
 import { CartLineThumb } from "@/components/cart/CartLineThumb";
 import { IconInstagram } from "@/components/ui/icons";
 import { company } from "@/lib/data/company";
@@ -415,18 +416,26 @@ export default function CheckoutPage() {
 
   if (lines.length === 0) {
     return (
-      <div className="container-25 flex flex-col items-center gap-4 py-24 text-center">
-        <p className="text-[15px] text-ink-60">{t.checkout.emptyCart}</p>
-        <LinkButton href="/collections/all">{t.checkout.backToShop}</LinkButton>
+      <div className="container-25 py-8">
+        <BackButton fallbackHref="/cart" />
+        <div className="flex flex-col items-center gap-4 py-16 text-center">
+          <p className="text-[15px] text-ink-60">{t.checkout.emptyCart}</p>
+          <LinkButton href="/collections/all">{t.checkout.backToShop}</LinkButton>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="container-25 py-8 md:py-12">
-      <h1 className="mb-8 text-center text-[22px] font-medium uppercase tracking-[0.06em] md:text-[28px]">
-        {t.checkout.title}
-      </h1>
+      <div className="mb-8 flex items-center gap-3">
+        <BackButton fallbackHref="/cart" />
+        <h1 className="flex-1 text-center text-[22px] font-medium uppercase tracking-[0.06em] md:text-[28px]">
+          {t.checkout.title}
+        </h1>
+        {/* spacer để cân đối với nút back bên trái, giữ tiêu đề thật sự nằm giữa khung */}
+        <span className="h-9 w-9 shrink-0" aria-hidden="true" />
+      </div>
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-10 md:grid-cols-[1fr_400px]">
         <div className="space-y-8">
