@@ -17,6 +17,9 @@ export async function POST(request: Request) {
     path: "/",
     maxAge: 60 * 60 * 24 * 365, // 1 năm — ít khi đổi ý ngôn ngữ, không cần bắt chọn lại thường xuyên
     sameSite: "lax",
+    // false ở local dev (http://localhost) — cookie "secure" bị trình duyệt bỏ qua trên
+    // HTTP thường, cùng quy ước với cookie đăng nhập admin/khách hàng (xem các route login).
+    secure: process.env.NODE_ENV === "production",
   });
   return response;
 }
