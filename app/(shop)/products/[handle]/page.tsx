@@ -10,6 +10,7 @@ import { ProductBuyBox } from "@/components/product/ProductBuyBox";
 import { Accordion } from "@/components/ui/Accordion";
 import { ShareButtons } from "@/components/product/ShareButtons";
 import { RelatedProducts } from "@/components/product/RelatedProducts";
+import { BackButton } from "@/components/ui/BackButton";
 import { getT, getLocale } from "@/lib/i18n/locale";
 
 type Props = {
@@ -83,16 +84,19 @@ export default async function ProductPage({ params, searchParams }: Props) {
       {/* eslint-disable-next-line react/no-danger */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
 
-      <nav className="mb-4 text-[12px] text-ink-60">
-        <Link href="/" className="hover:text-ink">
-          {t.product.breadcrumbHome}
-        </Link>{" "}
-        /{" "}
-        <Link href={`/collections/${product.collections[1] ?? "all"}`} className="hover:text-ink">
-          {product.category}
-        </Link>{" "}
-        / <span className="text-ink">{product.title}</span>
-      </nav>
+      <div className="mb-4 flex items-center gap-3">
+        <BackButton fallbackHref={`/collections/${product.collections[1] ?? "all"}`} />
+        <nav className="text-[12px] text-ink-60">
+          <Link href="/" className="hover:text-ink">
+            {t.product.breadcrumbHome}
+          </Link>{" "}
+          /{" "}
+          <Link href={`/collections/${product.collections[1] ?? "all"}`} className="hover:text-ink">
+            {product.category}
+          </Link>{" "}
+          / <span className="text-ink">{product.title}</span>
+        </nav>
+      </div>
 
       <div className="grid grid-cols-1 gap-8 md:grid-cols-[60%_40%] md:gap-12">
         <Gallery photos={photos} images={product.images} code={product.code} alt={product.title} />

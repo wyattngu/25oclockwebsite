@@ -24,6 +24,7 @@ const dictionaries = {
       viewFullPolicy: "Xem chính sách đầy đủ",
       dateLocale: "vi-VN",
       close: "Đóng",
+      back: "Quay lại",
     },
     announcement: {
       freeShipping: (amount: string) => `Miễn phí vận chuyển toàn quốc cho đơn từ ${amount}`,
@@ -280,6 +281,7 @@ const dictionaries = {
       viewFullPolicy: "View full policy",
       dateLocale: "en-US",
       close: "Close",
+      back: "Back",
     },
     announcement: {
       freeShipping: (amount: string) => `Free shipping in Vietnam on orders over ${amount}`,

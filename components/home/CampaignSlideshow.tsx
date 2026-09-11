@@ -4,6 +4,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
+import { BackButton } from "@/components/ui/BackButton";
 
 const SPACING_VW = 25; // khoảng cách giữa tâm các ảnh — đủ để ảnh bên chỉ hé khoảng nửa
 const DRAG_THRESHOLD = 60; // px — kéo quá mức này thì chuyển ảnh
@@ -75,6 +76,10 @@ export function CampaignSlideshow({ images, startIndex }: { images: string[]; st
       onPointerLeave={onPointerUp}
       onClick={onBackgroundClick}
     >
+      <div className="absolute left-4 top-4 z-20" onClick={(e) => e.stopPropagation()}>
+        <BackButton fallbackHref="/" variant="dark" />
+      </div>
+
       {images.map((src, i) => {
         const offset = i - active;
         const dist = Math.abs(offset);

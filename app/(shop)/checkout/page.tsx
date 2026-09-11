@@ -28,6 +28,7 @@ import { provinces, getDistrictsByProvinceCode, getWardsByDistrictCode } from "@
 import type { CartLine, OrderPayload } from "@/lib/types";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import { haptic } from "@/lib/utils/haptics";
+import { getLastOrderInfoFor, saveLastOrderInfo } from "@/lib/utils/lastOrderInfo";
 
 type OrderSummary = {
   lines: CartLine[];
@@ -156,6 +157,22 @@ export default function CheckoutPage() {
     }
   }, [customer, provinceCode, districtCode, draftHydrated]);
 
+  // Khách đã đăng nhập và từng đặt hàng thành công trước đó (cùng lượt đăng nhập, xem
+  // lib/utils/lastOrderInfo.ts) — tự điền lại thông tin giao hàng lần trước, khách chỉ
+  // cần kiểm tra lại. Chỉ áp dụng khi form đang THẬT SỰ trống (chưa có bản nháp/dữ liệu
+  // đang gõ dở) — không đè lên thông tin khách vừa nhập cho đơn khác.
+  useEffect(() => {
+    if (!draftHydrated || !loggedInEmail) return;
+    const saved = getLastOrderInfoFor(loggedInEmail);
+    if (!saved) return;
+    setCustomer((prev) => {
+      if (prev.address.trim() || prev.name.trim()) return prev;
+      return { ...prev, name: saved.name, phone: saved.phone, address: saved.address, city: saved.city, district: saved.district, ward: saved.ward };
+    });
+    setProvinceCode((prev) => (prev === null ? saved.provinceCode : prev));
+    setDistrictCode((prev) => (prev === null ? saved.districtCode : prev));
+  }, [draftHydrated, loggedInEmail]);
+
   const shippingFee =
     subtotalAmount >= company.freeShippingThreshold || subtotalAmount === 0
       ? 0
@@ -254,6 +271,21 @@ export default function CheckoutPage() {
       return;
     }
     haptic("success");
+    // Đã đăng nhập — nhớ lại thông tin giao hàng lần này cho đơn tiếp theo trong cùng
+    // lượt đăng nhập tự điền sẵn (xem effect nạp lại ở trên + lib/utils/lastOrderInfo.ts).
+    if (loggedInEmail) {
+      saveLastOrderInfo({
+        email: loggedInEmail,
+        name: customer.name,
+        phone: customer.phone,
+        address: customer.address,
+        city: customer.city,
+        district: customer.district,
+        ward: customer.ward,
+        provinceCode,
+        districtCode,
+      });
+    }
     // Chụp lại giỏ hàng trước khi clearCart() xoá sạch — bước xác nhận cần hiện
     // lại đúng những gì vừa đặt. Đơn được ghi nhận ngay — không còn nút "Tôi đã
     // chuyển khoản": khách chụp mã đơn gửi qua Instagram rồi thanh toán/xác nhận ở đó.
@@ -269,94 +301,105 @@ export default function CheckoutPage() {
   if (step.name === "done") {
     const qrUrl = buildVietQrUrl(step.total, step.orderId);
     return (
-      <div className="container-25 flex flex-col items-center gap-5 py-16 text-center">
-        <h1 className="text-[22px] font-medium uppercase tracking-[0.06em]">{t.checkout.orderSuccess}</h1>
-        <p className="text-[14px] text-ink-60">
-          {t.checkout.orderCode} <strong className="text-ink">#{step.orderId}</strong>
-        </p>
-
-        {/* eslint-disable-next-line @next/next/no-img-element -- ảnh QR động từ VietQR.io, không cần tối ưu qua next/image */}
-        <img
-          src={qrUrl}
-          alt={t.checkout.qrAlt(formatPrice({ amount: step.total, currencyCode: "VND" }))}
-          width={300}
-          height={430}
-          className="border border-line"
-        />
-
-        <div className="text-[14px]">
-          <p>
-            {t.checkout.amount}: <strong>{formatPrice({ amount: step.total, currencyCode: "VND" })}</strong>
-          </p>
-          <p>
-            {t.checkout.transferContent}: <strong>{step.orderId}</strong>
-          </p>
-          <p className="mt-2 text-ink-60">
-            {company.bankAccount.accountName} — {company.bankAccount.bankId.toUpperCase()} —{" "}
-            {company.bankAccount.accountNumber}
+      <div className="container-25 py-16">
+        <div className="text-center">
+          <h1 className="text-[22px] font-medium uppercase tracking-[0.06em]">{t.checkout.orderSuccess}</h1>
+          <p className="mt-2 text-[14px] text-ink-60">
+            {t.checkout.orderCode} <strong className="text-ink">#{step.orderId}</strong>
           </p>
         </div>
 
-        {!isBankAccountConfigured() ? (
-          <p className="max-w-sm text-[12px] text-sale">{t.checkout.sampleAccountWarning}</p>
-        ) : null}
+        {/* 2 cột từ md trở lên — trái: mã QR + số tiền cần chuyển (thứ cần đọc trước
+        tiên, để riêng cho gọn mắt); phải: bước tiếp theo + chi tiết đơn hàng, danh
+        sách sản phẩm tự cuộn riêng nếu đơn nhiều món, không kéo dài cả trang. */}
+        <div className="mt-8 grid grid-cols-1 items-start gap-10 md:grid-cols-2">
+          <div className="flex flex-col items-center gap-5 text-center">
+            {/* eslint-disable-next-line @next/next/no-img-element -- ảnh QR động từ VietQR.io, không cần tối ưu qua next/image */}
+            <img
+              src={qrUrl}
+              alt={t.checkout.qrAlt(formatPrice({ amount: step.total, currencyCode: "VND" }))}
+              width={300}
+              height={430}
+              className="border border-line"
+            />
 
-        <div className="w-full max-w-sm">
-          <InstagramNotice
-            heading={t.checkout.igDoneHeading}
-            message={
-              <>
-                {t.checkout.igDoneMessage} <strong className="text-white">#{step.orderId}</strong>
-                {t.checkout.igDoneMessageEnd}
-              </>
-            }
-          />
-        </div>
+            <div className="text-[14px]">
+              <p>
+                {t.checkout.amount}: <strong>{formatPrice({ amount: step.total, currencyCode: "VND" })}</strong>
+              </p>
+              <p>
+                {t.checkout.transferContent}: <strong>{step.orderId}</strong>
+              </p>
+              <p className="mt-2 text-ink-60">
+                {company.bankAccount.accountName} — {company.bankAccount.bankId.toUpperCase()} —{" "}
+                {company.bankAccount.accountNumber}
+              </p>
+            </div>
 
-        <div className="mt-4 w-full max-w-md border border-line text-left">
-          <div className="divide-y divide-line">
-            {step.lines.map((line) => (
-              <div key={line.lineId} className="flex gap-3 p-4">
-                <div className="w-14 shrink-0">
-                  <CartLineThumb photo={line.photo} tone={line.image.tone} alt={line.title} />
-                </div>
-                <div className="flex flex-1 flex-col justify-center">
-                  <p className="text-[13px] font-medium uppercase tracking-wide">{line.title}</p>
-                  <p className="mt-0.5 text-[12px] text-ink-60">
-                    {t.product.size} {line.size} · {t.cart.quantityAbbr} {line.quantity}
-                  </p>
-                </div>
-                <p className="self-center text-[13px] tabular-nums">
-                  {formatPrice({ amount: line.price.amount * line.quantity, currencyCode: "VND" })}
-                </p>
+            {!isBankAccountConfigured() ? (
+              <p className="max-w-sm text-[12px] text-sale">{t.checkout.sampleAccountWarning}</p>
+            ) : null}
+          </div>
+
+          <div className="flex flex-col gap-4 text-left">
+            <InstagramNotice
+              heading={t.checkout.igDoneHeading}
+              message={
+                <>
+                  {t.checkout.igDoneMessage} <strong className="text-white">#{step.orderId}</strong>
+                  {t.checkout.igDoneMessageEnd}
+                </>
+              }
+            />
+
+            <div className="w-full border border-line">
+              {/* max-h + overflow-y-auto — đơn nhiều món thì cuộn riêng trong khung này,
+              không đẩy phần tổng tiền/nút bên dưới trôi mất xuống cuối trang. */}
+              <div className="max-h-[360px] divide-y divide-line overflow-y-auto">
+                {step.lines.map((line) => (
+                  <div key={line.lineId} className="flex gap-3 p-4">
+                    <div className="w-14 shrink-0">
+                      <CartLineThumb photo={line.photo} tone={line.image.tone} alt={line.title} />
+                    </div>
+                    <div className="flex flex-1 flex-col justify-center">
+                      <p className="text-[13px] font-medium uppercase tracking-wide">{line.title}</p>
+                      <p className="mt-0.5 text-[12px] text-ink-60">
+                        {t.product.size} {line.size} · {t.cart.quantityAbbr} {line.quantity}
+                      </p>
+                    </div>
+                    <p className="self-center text-[13px] tabular-nums">
+                      {formatPrice({ amount: line.price.amount * line.quantity, currencyCode: "VND" })}
+                    </p>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          <div className="space-y-1.5 border-t border-line p-4 text-[13px]">
-            <div className="flex justify-between text-ink-60">
-              <span>{t.cart.subtotal}</span>
-              <span className="tabular-nums">{formatPrice({ amount: step.subtotal, currencyCode: "VND" })}</span>
+              <div className="space-y-1.5 border-t border-line p-4 text-[13px]">
+                <div className="flex justify-between text-ink-60">
+                  <span>{t.cart.subtotal}</span>
+                  <span className="tabular-nums">{formatPrice({ amount: step.subtotal, currencyCode: "VND" })}</span>
+                </div>
+                <div className="flex justify-between text-ink-60">
+                  <span>{t.checkout.shippingFee}</span>
+                  <span className="tabular-nums">
+                    {step.shippingFee === 0 ? t.checkout.free : formatPrice({ amount: step.shippingFee, currencyCode: "VND" })}
+                  </span>
+                </div>
+                <div className="flex justify-between pt-1 text-[14px] font-medium">
+                  <span>{t.checkout.total}</span>
+                  <span className="tabular-nums">{formatPrice({ amount: step.total, currencyCode: "VND" })}</span>
+                </div>
+                <div className="flex justify-between pt-1 text-ink-60">
+                  <span>{t.checkout.payment}</span>
+                  <span>{step.paymentLabel}</span>
+                </div>
+              </div>
             </div>
-            <div className="flex justify-between text-ink-60">
-              <span>{t.checkout.shippingFee}</span>
-              <span className="tabular-nums">
-                {step.shippingFee === 0 ? t.checkout.free : formatPrice({ amount: step.shippingFee, currencyCode: "VND" })}
-              </span>
-            </div>
-            <div className="flex justify-between pt-1 text-[14px] font-medium">
-              <span>{t.checkout.total}</span>
-              <span className="tabular-nums">{formatPrice({ amount: step.total, currencyCode: "VND" })}</span>
-            </div>
-            <div className="flex justify-between pt-1 text-ink-60">
-              <span>{t.checkout.payment}</span>
-              <span>{step.paymentLabel}</span>
-            </div>
+
+            <LinkButton href="/collections/all" className="self-start">
+              {t.common.continueShopping}
+            </LinkButton>
           </div>
         </div>
-
-        <LinkButton href="/collections/all" className="mt-4">
-          {t.common.continueShopping}
-        </LinkButton>
       </div>
     );
   }

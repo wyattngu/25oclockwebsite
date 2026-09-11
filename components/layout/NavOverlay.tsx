@@ -17,8 +17,10 @@ const SHOP_LINKS = navCollections.map((c) => ({
 }));
 
 // Tên tạm — đổi lại khi có tên chính thức cho từng lookbook.
+// Lookbook 0.1 đang TẠM ẨN khỏi menu (bỏ dòng comment bên dưới để hiện lại) — trang
+// /campaign vẫn còn nguyên, chỉ không còn hiện trong danh sách này.
 const LOOKBOOKS = [
-  { label: "0.1", href: "/campaign" },
+  // { label: "0.1", href: "/campaign" },
   { label: "0.2", href: "/campaign2" },
   { label: "0.3", href: "/campaign3" },
 ];

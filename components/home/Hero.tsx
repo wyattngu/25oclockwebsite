@@ -15,14 +15,16 @@ export async function Hero() {
     <section className="relative h-[100svh] w-full overflow-hidden md:h-[88vh]">
       {hasPhoto ? (
         <>
-          {/* Mobile: ưu tiên bản dọc riêng, rơi về bản desktop nếu chưa có */}
+          {/* Mobile: ưu tiên bản dọc riêng, rơi về bản desktop nếu chưa có. object-position
+          đẩy khung hình hiển thị xuống 1 chút (crop bớt phía dưới, chừa thêm khoảng trống
+          phía trên đầu người) — tránh đầu người dính sát/đè vào thanh thông báo freeship. */}
           <Image
             src={mobile ?? desktop!}
             alt="25 o'clock — A25 Holiday Lookbook"
             fill
             priority
             sizes="100vw"
-            className="object-cover md:hidden"
+            className="object-cover object-[center_25%] md:hidden"
           />
           <Image
             src={desktop ?? mobile!}
@@ -30,7 +32,7 @@ export async function Hero() {
             fill
             priority
             sizes="100vw"
-            className="hidden object-cover md:block"
+            className="hidden object-cover object-[center_30%] md:block"
           />
         </>
       ) : (

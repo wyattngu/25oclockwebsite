@@ -10,6 +10,7 @@ import { AddedToast } from "@/components/cart/AddedToast";
 import { FloatingInstagram } from "@/components/layout/FloatingInstagram";
 import { MainOffset } from "@/components/layout/MainOffset";
 import { PageTransition } from "@/components/layout/PageTransition";
+import { NavigationHistoryTracker } from "@/components/layout/NavigationHistoryTracker";
 import { CursorSparkles } from "@/components/effects/CursorSparkles";
 import { CUSTOMER_COOKIE_NAME, verifySessionToken } from "@/lib/auth/customer";
 import { navCollections } from "@/lib/data/collections";
@@ -32,6 +33,7 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
   return (
     <LocaleProvider initialLocale={locale} initialHasChosen={localeChosen}>
       <CartProvider>
+        <NavigationHistoryTracker />
         <LanguagePopup />
         <Header isLoggedIn={isLoggedIn} collectionCovers={collectionCovers} productPhotos={productPhotos} />
         <MainOffset>
