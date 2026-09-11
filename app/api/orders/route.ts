@@ -3,7 +3,11 @@ import { Resend } from "resend";
 import { company } from "@/lib/data/company";
 import { formatPrice } from "@/lib/utils/formatPrice";
 import { createOrder } from "@/lib/data/orders";
-import type { OrderPayload } from "@/lib/types";
+import { escapeHtml } from "@/lib/utils/escapeHtml";
+import { getProductByHandle } from "@/lib/data/products";
+import { provinces } from "@/lib/data/vietnamLocations";
+import { isValidVietnamesePhone, normalizePhone } from "@/lib/utils/phone";
+import type { OrderLineInput, OrderPayload } from "@/lib/types";
 
 /**
  * Nhận đơn hàng từ trang /checkout:
@@ -17,12 +21,45 @@ import type { OrderPayload } from "@/lib/types";
  * KHÔNG làm hỏng luồng đặt hàng của khách. Xem .env.local.example.
  */
 
-function escapeHtml(input: string): string {
-  return input
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+// Mã tỉnh/thành của Hà Nội (đồng bộ với app/(shop)/checkout/page.tsx) — dùng để tính lại
+// phí ship phía server, không tin "shippingFee"/"total" client tự tính gửi lên.
+const HANOI_PROVINCE_CODE = 1;
+
+function isHanoi(cityName: string | undefined): boolean {
+  if (!cityName) return false;
+  return provinces.find((p) => p.name === cityName)?.code === HANOI_PROVINCE_CODE;
+}
+
+/**
+ * Tra lại giá THẬT theo catalog cho từng dòng sản phẩm — API này nhận request trực
+ * tiếp từ trình duyệt khách, "title"/"price" trong payload gốc CÓ THỂ bị sửa trước khi
+ * gửi (vd. đổi giá về 1đ) nếu chỉ tin theo dữ liệu client gửi lên. Trả về null nếu có
+ * dòng nào không khớp được sản phẩm/size thật hoặc size đó đã hết hàng — khi đó từ chối
+ * lưu cả đơn thay vì lưu với giá sai.
+ */
+function resolveTrustedLines(rawLines: OrderLineInput[]): { lines: OrderLineInput[]; subtotalAmount: number } | null {
+  if (rawLines.length === 0) return null;
+  const lines: OrderLineInput[] = [];
+  let subtotalAmount = 0;
+  for (const raw of rawLines) {
+    if (!raw.productHandle || !raw.variantId) return null;
+    const product = getProductByHandle(raw.productHandle);
+    const variant = product?.variants.find((v) => v.id === raw.variantId);
+    if (!product || !variant || !variant.available) return null;
+    // Số lượng 1–10, khớp giới hạn trên UI (xem ProductBuyBox.tsx) — phòng khi client gửi
+    // số âm/số ảo/số thập phân.
+    const quantity = Math.min(10, Math.max(1, Math.floor(Number(raw.quantity)) || 1));
+    lines.push({
+      title: product.title,
+      size: variant.size,
+      quantity,
+      price: variant.price,
+      productHandle: raw.productHandle,
+      variantId: raw.variantId,
+    });
+    subtotalAmount += variant.price.amount * quantity;
+  }
+  return { lines, subtotalAmount };
 }
 
 function buildAdminEmailHtml(payload: OrderPayload): string {
@@ -97,16 +134,47 @@ async function sendAdminEmail(payload: OrderPayload): Promise<boolean> {
 }
 
 export async function POST(request: Request) {
-  let payload: OrderPayload;
+  let rawPayload: OrderPayload;
   try {
-    payload = await request.json();
+    rawPayload = await request.json();
   } catch {
     return NextResponse.json({ ok: false, error: "invalid_json" }, { status: 400 });
   }
 
-  if (!payload?.orderId || !payload?.customer || !Array.isArray(payload.lines)) {
+  if (!rawPayload?.orderId || !rawPayload?.customer || !Array.isArray(rawPayload.lines)) {
     return NextResponse.json({ ok: false, error: "invalid_payload" }, { status: 400 });
   }
+  if (!isValidVietnamesePhone(rawPayload.customer.phone)) {
+    return NextResponse.json({ ok: false, error: "invalid_phone" }, { status: 400 });
+  }
+  if (!/^\S+@\S+\.\S+$/.test(rawPayload.customer.email)) {
+    return NextResponse.json({ ok: false, error: "invalid_email" }, { status: 400 });
+  }
+
+  const resolved = resolveTrustedLines(rawPayload.lines);
+  if (!resolved) {
+    return NextResponse.json({ ok: false, error: "invalid_line" }, { status: 400 });
+  }
+  const { lines, subtotalAmount } = resolved;
+  const shippingFeeAmount =
+    subtotalAmount === 0 || subtotalAmount >= company.freeShippingThreshold
+      ? 0
+      : isHanoi(rawPayload.customer.city)
+        ? company.shippingFeeHanoi
+        : company.shippingFeeOtherProvinces;
+
+  // "payload" đã lưu = số tiền server tự tính lại (subtotal/shippingFee/total), KHÔNG
+  // dùng số client gửi lên — customer/orderId/paymentMethod vẫn giữ nguyên vì không phải
+  // dữ liệu tiền bạc (chỉ ảnh hưởng hiển thị, không tạo ra chênh lệch tiền thật).
+  const payload: OrderPayload = {
+    orderId: rawPayload.orderId,
+    paymentMethod: rawPayload.paymentMethod,
+    customer: { ...rawPayload.customer, phone: normalizePhone(rawPayload.customer.phone) },
+    lines,
+    subtotal: { amount: subtotalAmount, currencyCode: "VND" },
+    shippingFee: { amount: shippingFeeAmount, currencyCode: "VND" },
+    total: { amount: subtotalAmount + shippingFeeAmount, currencyCode: "VND" },
+  };
 
   const [{ ok: saved }, emailed] = await Promise.all([createOrder(payload), sendAdminEmail(payload)]);
 

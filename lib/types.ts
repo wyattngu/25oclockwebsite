@@ -123,6 +123,14 @@ export type OrderLineInput = {
   size: string;
   quantity: number;
   price: Money;
+  /**
+   * Dùng để server tự tra lại giá THẬT theo catalog khi lưu đơn (xem app/api/orders/route.ts)
+   * — không tin thẳng "title"/"price" phía trên do client gửi lên, tránh bị sửa giá trước
+   * khi gửi request. "title"/"price" vẫn giữ lại cho các đơn cũ đã lưu trước khi có 2 trường
+   * này, và để hiển thị ngay không cần tra cứu lại khi không có 2 trường bên dưới.
+   */
+  productHandle?: string;
+  variantId?: string;
 };
 
 export type OrderPayload = {

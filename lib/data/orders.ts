@@ -135,3 +135,14 @@ export async function setOrderStatus(id: string, status: OrderStatus): Promise<O
   }
   return data ? rowToOrder(data as OrderRow) : null;
 }
+
+/** Xoá vĩnh viễn 1 đơn hàng — dùng cho đơn rác/test/trùng. Không thể khôi phục lại được. */
+export async function deleteOrder(id: string): Promise<boolean> {
+  if (!isSupabaseConfigured()) return false;
+  const { error } = await getSupabaseAdmin().from("orders").delete().eq("id", id);
+  if (error) {
+    console.error("[orders] Xoá đơn hàng thất bại:", error);
+    return false;
+  }
+  return true;
+}

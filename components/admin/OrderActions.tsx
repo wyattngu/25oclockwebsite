@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/Button";
 
 type Props = { orderId: string; status: OrderStatus; paymentMethod: string };
 
-type Action = "confirm" | "cancel" | "remind";
+type Action = "confirm" | "cancel" | "remind" | "delete";
 
 export function OrderActions({ orderId, status, paymentMethod }: Props) {
   const router = useRouter();
@@ -63,11 +63,39 @@ export function OrderActions({ orderId, status, paymentMethod }: Props) {
     }
   }
 
-  if (status === "confirmed") {
-    return <p className="text-[14px] text-ink-60">Đơn này đã được xác nhận.</p>;
+  async function remove() {
+    // Xoá vĩnh viễn, không khôi phục lại được — bắt xác nhận lại 1 lần trước khi gọi API.
+    if (!window.confirm(`Xoá vĩnh viễn đơn #${orderId}? Không thể khôi phục lại được.`)) return;
+    setLoading("delete");
+    setMessage(null);
+    try {
+      const res = await fetch(`/api/admin/orders/${orderId}/delete`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        setMessage("Xoá thất bại, thử lại.");
+        return;
+      }
+      router.push("/admin/orders");
+      router.refresh();
+    } finally {
+      setLoading(null);
+    }
   }
-  if (status === "cancelled") {
-    return <p className="text-[14px] text-ink-60">Đơn này đã bị huỷ.</p>;
+
+  const deleteButton = (
+    <Button type="button" variant="ghost" onClick={remove} disabled={loading !== null} className="px-8 border-sale text-sale hover:bg-sale hover:text-white">
+      {loading === "delete" ? "Đang xoá…" : "Xoá đơn hàng"}
+    </Button>
+  );
+
+  if (status === "confirmed" || status === "cancelled") {
+    return (
+      <div className="space-y-3">
+        <p className="text-[14px] text-ink-60">{status === "confirmed" ? "Đơn này đã được xác nhận." : "Đơn này đã bị huỷ."}</p>
+        <div className="flex flex-wrap gap-3">{deleteButton}</div>
+        {message ? <p className="text-[13px] text-ink-60">{message}</p> : null}
+      </div>
+    );
   }
 
   return (
@@ -92,6 +120,8 @@ export function OrderActions({ orderId, status, paymentMethod }: Props) {
         >
           {loading === "cancel" ? "Đang xử lý…" : "Huỷ đơn"}
         </Button>
+
+        {deleteButton}
       </div>
       {message ? <p className="text-[13px] text-ink-60">{message}</p> : null}
     </div>

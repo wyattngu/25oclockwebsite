@@ -223,7 +223,16 @@ export default function CheckoutPage() {
       // thường tuyệt đối (cột "text" thường, không phải "citext") — đơn bị lưu đúng nhưng
       // "biến mất" khỏi trang Tài khoản của chính khách đó vì không khớp được.
       customer: { ...customer, email: customer.email.trim().toLowerCase(), phone: normalizePhone(customer.phone) },
-      lines: lines.map((l) => ({ title: l.title, size: l.size, quantity: l.quantity, price: l.price })),
+      // Gửi kèm productHandle/variantId — server tự tra lại giá thật theo catalog từ 2
+      // trường này khi lưu đơn (không tin "title"/"price" gửi lên), xem app/api/orders/route.ts.
+      lines: lines.map((l) => ({
+        title: l.title,
+        size: l.size,
+        quantity: l.quantity,
+        price: l.price,
+        productHandle: l.productHandle,
+        variantId: l.variantId,
+      })),
       subtotal: { amount: subtotalAmount, currencyCode: "VND" },
       shippingFee: { amount: shippingFee, currencyCode: "VND" },
       total: { amount: total, currencyCode: "VND" },

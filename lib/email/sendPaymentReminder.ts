@@ -2,6 +2,7 @@ import { Resend } from "resend";
 import { formatPrice } from "@/lib/utils/formatPrice";
 import { buildVietQrUrl } from "@/lib/utils/vietqr";
 import { company } from "@/lib/data/company";
+import { escapeHtml } from "@/lib/utils/escapeHtml";
 import type { Order } from "@/lib/types";
 
 /**
@@ -24,9 +25,9 @@ export async function sendPaymentReminder(order: Order): Promise<boolean> {
 
   const html = `
     <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#111;max-width:480px">
-      <h2 style="margin:0 0 12px">Đơn hàng #${order.id} chưa được thanh toán</h2>
-      <p>Chào ${order.customer.name},</p>
-      <p>25 o'clock chưa ghi nhận được thanh toán cho đơn hàng #${order.id} của bạn. Vui lòng hoàn tất chuyển khoản theo thông tin bên dưới để đơn được xử lý và giao sớm nhất.</p>
+      <h2 style="margin:0 0 12px">Đơn hàng #${escapeHtml(order.id)} chưa được thanh toán</h2>
+      <p>Chào ${escapeHtml(order.customer.name)},</p>
+      <p>25 o'clock chưa ghi nhận được thanh toán cho đơn hàng #${escapeHtml(order.id)} của bạn. Vui lòng hoàn tất chuyển khoản theo thông tin bên dưới để đơn được xử lý và giao sớm nhất.</p>
 
       <div style="margin:20px 0;text-align:center">
         <img src="${qrUrl}" alt="Mã VietQR" width="240" style="border:1px solid #ddd" />
@@ -34,7 +35,7 @@ export async function sendPaymentReminder(order: Order): Promise<boolean> {
 
       <p>
         Số tiền: <strong>${formatPrice(order.total)}</strong><br/>
-        Nội dung chuyển khoản: <strong>${order.id}</strong><br/>
+        Nội dung chuyển khoản: <strong>${escapeHtml(order.id)}</strong><br/>
         ${company.bankAccount.accountName} — ${company.bankAccount.bankId.toUpperCase()} — ${company.bankAccount.accountNumber}
       </p>
 
