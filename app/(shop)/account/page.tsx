@@ -4,6 +4,7 @@ import { getOrdersByEmail } from "@/lib/data/orders";
 import { formatPrice } from "@/lib/utils/formatPrice";
 import { OrderStatusBadge } from "@/components/admin/OrderStatusBadge";
 import { LogoutButton } from "@/components/account/LogoutButton";
+import { BackButton } from "@/components/ui/BackButton";
 import { getT, getLocale } from "@/lib/i18n/locale";
 
 // Trạng thái đăng nhập + đơn hàng đọc theo từng request — không prerender tĩnh.
@@ -16,21 +17,24 @@ export default async function AccountPage() {
 
   if (!customer) {
     return (
-      <div className="container-25 flex flex-col items-center gap-4 py-24 text-center">
-        <p className="text-[15px] text-ink-60">{t.account.notLoggedIn}</p>
-        <div className="flex gap-3">
-          <Link
-            href="/account/login"
-            className="inline-flex h-12 items-center bg-ink px-8 text-[13px] font-medium uppercase tracking-[0.1em] text-white hover:bg-ink-60"
-          >
-            {t.account.login}
-          </Link>
-          <Link
-            href="/account/register"
-            className="inline-flex h-12 items-center border border-ink px-8 text-[13px] font-medium uppercase tracking-[0.1em] text-ink hover:bg-ink hover:text-white"
-          >
-            {t.account.createAccount}
-          </Link>
+      <div className="container-25 py-8">
+        <BackButton fallbackHref="/" />
+        <div className="flex flex-col items-center gap-4 py-16 text-center">
+          <p className="text-[15px] text-ink-60">{t.account.notLoggedIn}</p>
+          <div className="flex gap-3">
+            <Link
+              href="/account/login"
+              className="inline-flex h-12 items-center bg-ink px-8 text-[13px] font-medium uppercase tracking-[0.1em] text-white hover:bg-ink-60"
+            >
+              {t.account.login}
+            </Link>
+            <Link
+              href="/account/register"
+              className="inline-flex h-12 items-center border border-ink px-8 text-[13px] font-medium uppercase tracking-[0.1em] text-ink hover:bg-ink hover:text-white"
+            >
+              {t.account.createAccount}
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -41,7 +45,10 @@ export default async function AccountPage() {
   return (
     <div className="container-25 max-w-2xl py-8 md:py-12">
       <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-[22px] font-medium uppercase tracking-[0.06em]">{t.account.title}</h1>
+        <div className="flex items-center gap-3">
+          <BackButton fallbackHref="/" />
+          <h1 className="text-[22px] font-medium uppercase tracking-[0.06em]">{t.account.title}</h1>
+        </div>
         <LogoutButton />
       </div>
 

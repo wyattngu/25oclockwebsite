@@ -28,8 +28,10 @@ function LoginForm() {
         setError(data.error === "wrong_password" ? "Sai mật khẩu." : "Chưa cấu hình ADMIN_PASSWORD trong .env.local.");
         return;
       }
-      const next = searchParams.get("next") || "/admin/orders";
-      router.push(next);
+      // "/admin" tự có redirect riêng (app/admin/page.tsx) nên về "next=/admin" vẫn ổn,
+      // nhưng ưu tiên thẳng "/admin/orders" ở đây luôn — đỡ phải nhảy qua 1 lượt redirect nữa.
+      const next = searchParams.get("next");
+      router.push(!next || next === "/admin" ? "/admin/orders" : next);
       router.refresh();
     } finally {
       setLoading(false);
