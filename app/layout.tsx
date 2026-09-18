@@ -40,22 +40,19 @@ export async function generateMetadata(): Promise<Metadata> {
  * khớp khi khách tìm "25oclock" thay vì gõ đúng "25 O'Clock". "sameAs" trỏ sang
  * Instagram chính chủ — Google dùng để xác thực đây đúng là cùng 1 thương hiệu, không
  * phải hàng giả/trang giả mạo (nhất là khi có vài cái tên gần giống đã tồn tại sẵn).
+ * "description" là slogan thương hiệu — giữ nguyên tiếng Anh ở cả 2 ngôn ngữ (lựa chọn
+ * thương hiệu, không phải dịch), đồng bộ với "site.description" trong dictionary.ts.
  */
-function organizationJsonLd(locale: string) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    name: "25 O'Clock",
-    alternateName: ["25oclock", "25 oclock", "25OClock", "25oclock.home"],
-    url: "https://25oclockhome.com",
-    logo: "https://25oclockhome.com/images/logo/logo-black.png",
-    description:
-      locale === "en"
-        ? "25 O'Clock — a denim and genuine leather label, made in Vietnam."
-        : "25 O'Clock — thương hiệu thời trang denim & da thật, sản xuất tại Việt Nam.",
-    sameAs: [company.instagram.url],
-  };
-}
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "25 O'Clock",
+  alternateName: ["25oclock", "25 oclock", "25OClock", "25oclock.home"],
+  url: "https://25oclockhome.com",
+  logo: "https://25oclockhome.com/images/logo/logo-black.png",
+  description: "Denim is the material 25 o'clock chose as its core and its signature.",
+  sameAs: [company.instagram.url],
+};
 
 /**
  * Layout gốc — chỉ dựng khung <html>/<body> + font. Chrome của cửa hàng (Header,
@@ -68,7 +65,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang={locale} className={inter.variable}>
       <body>
         {/* eslint-disable-next-line react/no-danger */}
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd(locale)) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }} />
         <NextTopLoader color="#000000" height={2} showSpinner={false} shadow={false} />
         {children}
       </body>

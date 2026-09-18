@@ -254,8 +254,8 @@ const dictionaries = {
     },
     site: {
       titleDefault: "25 O'Clock",
-      description: "25 o'clock — thương hiệu thời trang denim & da thật, sản xuất tại Việt Nam. Gallery tối giản, sản phẩm là nhân vật chính.",
-      ogDescription: "Thời trang denim & da thật, sản xuất tại Việt Nam.",
+      description: "Denim is the material 25 o'clock chose as its core and its signature.",
+      ogDescription: "Denim is the material 25 o'clock chose as its core and its signature.",
     },
     languagePopup: {
       heading: "Chọn ngôn ngữ",
@@ -507,8 +507,8 @@ const dictionaries = {
     },
     site: {
       titleDefault: "25 O'Clock",
-      description: "25 o'clock — a denim and genuine leather label, made in Vietnam. A minimal gallery where the product is the main character.",
-      ogDescription: "Denim and genuine leather, made in Vietnam.",
+      description: "Denim is the material 25 o'clock chose as its core and its signature.",
+      ogDescription: "Denim is the material 25 o'clock chose as its core and its signature.",
     },
     languagePopup: {
       heading: "Choose your language",
