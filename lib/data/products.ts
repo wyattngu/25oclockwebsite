@@ -105,7 +105,7 @@ const RAW: RawProduct[] = [
     tones: ["charcoal", "ink", "charcoal", "stone"],
     labels: ["FRONT", "ON MODEL", "BACK", "DETAIL"],
     sizes: ["0","1", "2"],
-    unavailableSizes: ["0","1"], // ví dụ: ["1"] nếu hết size 1
+    unavailableSizes: ["1"], // ví dụ: ["1"] nếu hết size 1
     sizeChart: MIDNIGHT_SIZE_CHART,
     material: "Vải raw denim đen, bề mặt mộc, đứng form",
     materialEn: "Black raw denim, unwashed finish, stiff hand-feel",
