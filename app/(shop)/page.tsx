@@ -18,8 +18,7 @@ export default function HomePage() {
     <>
       <Hero />
       <NewArrivals />
-      {/* Lookbook 0.1 đang TẠM ẨN khỏi trang chủ — bỏ comment dòng dưới để hiện lại. */}
-      {/* <CampaignSection /> */}
+      <CampaignSection />
       <Campaign2Section />
       <Campaign3Section />
       <CategoryTiles />
