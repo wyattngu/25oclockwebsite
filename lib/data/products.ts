@@ -260,6 +260,49 @@ const RAW: RawProduct[] = [
       "Soft knit wool, stretchy, breathable and non-itchy, embroidered OnlyFriends/25 O'Clock logo, pin included, unisex.",
     ],
   },
+  {
+    "code": "cxcxcx",
+    "title": "cxcxcx",
+    "handle": "cxcxcx",
+    "category": "Tops",
+    "tags": [],
+    "price": 5999999,
+    "tones": [
+      "sand"
+    ],
+    "labels": [
+      "Ảnh sản phẩm sẽ được cập nhật sau"
+    ],
+    "sizes": [
+      "1",
+      "2",
+      "3"
+    ],
+    "sizeChart": [
+      {
+        "size": "cx",
+        "chest": "cxcx",
+        "waist": "cxcxc",
+        "length": "cx",
+        "hip": "cxc",
+        "thigh": "xcxc",
+        "legOpening": "xcx"
+      }
+    ],
+    "material": "vcsvcxcxc",
+    "materialEn": "cxcxcxc",
+    "care": "xzxzxzxzxz",
+    "fit": "Regular",
+    "modelInfo": "xzxzxz",
+    "collections": [
+      "all",
+      "tops",
+      "new"
+    ],
+    "createdAt": "2026-10-30",
+    "descriptionVi": "zxzxzxz",
+    "unavailableSizes": []
+  },
 ];
 
 export const products: Product[] = RAW.map((r) => {
