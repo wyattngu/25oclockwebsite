@@ -260,6 +260,55 @@ const RAW: RawProduct[] = [
       "Soft knit wool, stretchy, breathable and non-itchy, embroidered OnlyFriends/25 O'Clock logo, pin included, unisex.",
     ],
   },
+  {
+    code: "TWL",
+    title: "TWILIGHT ENGINEERED WASHED DENIM PANT (15OZ HEAVYWEIGHT)",
+    handle: "twilight-engineered-washed-denim-pant",
+    category: "Bottoms",
+    tags: ["denim", "washed", "engineered"],
+    price: 890000,
+    tones: ["ink", "charcoal", "ink", "stone"],
+    labels: ["FRONT", "ON MODEL", "BACK", "DETAIL"],
+    sizes: ["1", "2", "3"],
+    unavailableSizes: [], // ví dụ: ["1"] nếu hết size 1
+    // Chưa có số đo thật từng size — để trống, điền vào mảng này khi có (xem
+    // ECLIPSE_SIZE_CHART/MIDNIGHT_SIZE_CHART bên trên để theo đúng mẫu).
+    sizeChart: [],
+    material: "Denim 100% cotton 15oz, wash đen xám, vân twill.",
+    materialEn: "100% cotton denim, 15oz heavyweight, washed black-grey, twill weave.",
+    care: "Giặt tay hoặc giặt máy chế độ nhẹ, nước lạnh, lộn trái trước khi giặt. Không dùng chất tẩy mạnh, phơi trong bóng râm.",
+    careEn: "Hand wash or gentle machine wash, cold water, inside out. No harsh detergents, dry in the shade.",
+    fit: "Regular", // engineered fit, ống cong nhẹ — xem chi tiết trong "details" bên dưới
+    // TODO: điền đúng chiều cao/cân nặng/size model thật khi có (xem ảnh on-model đã có sẵn).
+    modelInfo: "Đang cập nhật",
+    modelInfoEn: "Updating soon",
+    collections: ["all", "bottoms", "new"],
+    createdAt: "2026-11-04",
+    details: [
+      "Màu: Washed Black",
+      "Form: Engineered fit, ống cong nhẹ",
+      "Đường cắt panel chéo mặt trước",
+      "Đường chiết dọc phía sau ống",
+      "Signature strap lưng sau với 5 khuy bấm khắc logo",
+      "Túi sau có nắp thiết kế cánh rơi, cài khuy bấm",
+      "Khoen kim loại (O-ring) ở đỉa quần trước",
+      "Cúc kim loại donut 25 O'CLOCK",
+      "Signature baby blue tab",
+      "Tag da dập nổi logo XXV",
+    ],
+    detailsEn: [
+      "Color: Washed Black",
+      "Fit: Engineered fit, slight curved leg",
+      "Diagonal panel cut on the front",
+      "Vertical darts on the back leg",
+      "Signature back waist strap with 5 logo-engraved snap buttons",
+      "Flap back pockets with snap button closure",
+      "Metal O-ring on the front belt loop",
+      "25 O'CLOCK donut metal button",
+      "Signature baby blue tab",
+      "Embossed leather tag with XXV logo",
+    ],
+  },
 ];
 
 export const products: Product[] = RAW.map((r) => {
