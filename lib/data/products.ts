@@ -49,6 +49,12 @@ const ECLIPSE_SIZE_CHART: SizeChartRow[] = [
   { size: "2", waist: "82 cm", length: "105 cm", thigh: "31 cm", legOpening: "25 cm" },
   { size: "3", waist: "88 cm", length: "108 cm", thigh: "32 cm", legOpening: "26 cm" },
 ];
+
+const TWILIGHT_SIZE_CHART: SizeChartRow[] = [
+  { size: "1", waist: "78 cm", length: "103 cm", thigh: "30 cm", legOpening: "24 cm" },
+  { size: "2", waist: "82 cm", length: "105 cm", thigh: "32 cm", legOpening: "25 cm" },
+  { size: "3", waist: "88 cm", length: "110 cm", thigh: "34 cm", legOpening: "26 cm" },
+];
 type RawProduct = {
   code: string;
   /** Tên sản phẩm đầy đủ, dùng nguyên văn làm title — không qua khuôn "25OC | <MÃ> <LOẠI>". */
@@ -271,9 +277,7 @@ const RAW: RawProduct[] = [
     labels: ["FRONT", "ON MODEL", "BACK", "DETAIL"],
     sizes: ["1", "2", "3"],
     unavailableSizes: [], // ví dụ: ["1"] nếu hết size 1
-    // Chưa có số đo thật từng size — để trống, điền vào mảng này khi có (xem
-    // ECLIPSE_SIZE_CHART/MIDNIGHT_SIZE_CHART bên trên để theo đúng mẫu).
-    sizeChart: [],
+    sizeChart: TWILIGHT_SIZE_CHART,
     material: "Denim 100% cotton 15oz, wash đen xám, vân twill.",
     materialEn: "100% cotton denim, 15oz heavyweight, washed black-grey, twill weave.",
     care: "Giặt tay hoặc giặt máy chế độ nhẹ, nước lạnh, lộn trái trước khi giặt. Không dùng chất tẩy mạnh, phơi trong bóng râm.",
